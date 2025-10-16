@@ -19,8 +19,7 @@ dependencies = [
     "matplotlib>=3.10.3",
     "mcp>=1.12.3",
     # https://github.com/openai/openai-agents-python/issues/1395 | openai==1.97.1 & openai-agents==0.2.5
-    "openai==1.99.6",
-    "openai-agents==0.2.8",
+    "openai-agents==0.3.3",
     # https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai
     "openinference-instrumentation-openai>=0.1.30",
     "openinference-instrumentation-openai-agents>=1.1.1",
