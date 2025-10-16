@@ -44,8 +44,8 @@ from .common import (
 CONFIG_PATH = DIR_ROOT / "configs" / "agents"
 WORKSPACE_ROOT = "/tmp/utu_webui_workspace"
 
-class Session:
 
+class Session:
     def __init__(self, session_id: str = None):
         if session_id is None:
             session_id = Session.gen_session_id()
@@ -62,6 +62,7 @@ class Session:
 
     def clean_up_workspace(self):
         os.rmdir(self.workspace)
+
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def initialize(self, default_config_filename: str):
@@ -246,7 +247,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         # set workdir for bash tool
         for key, value in config.toolkits.items():
             if key == "BashTool":
-                value.config['workspace_root'] = self.session.workspace
+                value.config["workspace_root"] = self.session.workspace
 
         await self.instantiate_agent(config)
         content = self._get_current_agent_content()
