@@ -481,6 +481,7 @@ def handle_pure_text(text: str, target_shape, slide):
         for paragraph in text_frame.paragraphs:
             for run in paragraph.runs:
                 run.text = text
+                text = ""
     except Exception as e:
         logging.error(f"Failed to set text: {text} {e}")
         traceback.print_exc()
