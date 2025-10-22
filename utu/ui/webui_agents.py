@@ -69,6 +69,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.default_config_filename = default_config_filename
         logging.info(f"initialize websocket, default config: {default_config_filename}")
         self.agent: SimpleAgent | OrchestraAgent | OrchestratorAgent | None = None
+        self.history = None  # recorder for multi-turn chat. Now only used for OrchestraAgent
         self.default_config = None
         self.session = None
 
@@ -168,12 +169,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if isinstance(self.agent, OrchestraAgent):
             stream = self.agent.run_streamed(query.query)
         elif isinstance(self.agent, SimpleAgent):
-            self.agent.input_items.append({"role": "user", "content": query.query})
-            stream = self.agent.run_streamed(self.agent.input_items)
+            # self.agent.input_items.append({"role": "user", "content": query.query})
+            stream = self.agent.run_streamed(query.query, save=True)
         elif isinstance(self.agent, SimpleAgentGenerator):
             stream = self.agent.run_streamed(query.query)
         elif isinstance(self.agent, OrchestratorAgent):
-            stream = self.agent.run_streamed(query.query)
+            stream = self.agent.run_streamed(query.query, self.history)
+            self.history = stream
         else:
             raise ValueError(f"Unsupported agent type: {type(self.agent).__name__}")
 
