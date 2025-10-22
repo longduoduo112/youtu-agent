@@ -52,7 +52,7 @@ class SQLModelUtils:
         # Import models so SQLModel knows about all tables
         try:
             # Core models registered here
-            from utu.db import eval_datapoint, tool_cache_model, tracing_model  # noqa: F401
+            from utu.db import eval_datapoint, tool_cache_model, tracing_model, trajectory_model  # noqa: F401
         except Exception as e:
             logger.debug(f"Model import warning (non-fatal): {e}")
 
