@@ -23,6 +23,7 @@ from ..config import AgentConfig, ConfigLoader, ToolkitConfig
 from ..context import BaseContextManager, build_context_manager
 from ..db import DBService, TrajectoryModel
 from ..env import BaseEnv, get_env
+from ..hooks import get_run_hooks
 from ..tools import TOOLKIT_MAP, AsyncBaseToolkit
 from ..tools.utils import get_mcp_server
 from ..utils import AgentsUtils, get_logger, load_class_from_file
@@ -63,8 +64,8 @@ class SimpleAgent:
         self.env: BaseEnv = None
         self.current_agent: Agent[TContext] = None  # move to task recorder?
         self.input_items: list[TResponseInputItem] = []
+        self.run_hooks: RunHooks = get_run_hooks(self.config)
 
-        self._run_hooks: RunHooks = None
         self._mcp_servers: list[MCPServer] = []
         self._toolkits: dict[str, AsyncBaseToolkit] = {}
         self._mcps_exit_stack = AsyncExitStack()
@@ -207,7 +208,7 @@ class SimpleAgent:
             "input": input,
             "context": self._get_context(),
             "max_turns": self.config.max_turns,
-            "hooks": self._run_hooks,
+            "hooks": self.run_hooks,
             "run_config": self._get_run_config(),
         }
 
@@ -300,7 +301,3 @@ class SimpleAgent:
     def clear_input_items(self):
         # reset chat history
         self.input_items = []
-
-    def set_run_hooks(self, run_hooks: RunHooks):
-        # WIP
-        self._run_hooks = run_hooks
