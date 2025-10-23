@@ -244,7 +244,7 @@ class SimpleAgent:
         else:
             assert isinstance(input, str), "input should be str or list of TResponseInputItem!"
             task = input
-        recorder = TaskRecorder(task=task, trace_id=trace_id)
+        recorder = TaskRecorder(task=task, input=input, trace_id=trace_id)
         recorder._run_impl_task = asyncio.create_task(self._start_streaming(recorder, save, log_to_db))
         return recorder
 
@@ -252,8 +252,8 @@ class SimpleAgent:
         if not self._initialized:
             await self.build(recorder.trace_id)
         try:
-            input = recorder.task
-            if isinstance(input, str):
+            input = recorder.input
+            if isinstance(input, str):  # only add history when input is str?
                 input = self.input_items + [{"content": input, "role": "user"}]
             run_kwargs = self._prepare_run_kwargs(input)
             if AgentsUtils.get_current_trace():
