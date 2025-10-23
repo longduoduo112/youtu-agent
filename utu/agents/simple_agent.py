@@ -11,8 +11,6 @@ from agents import (
     RunConfig,
     RunHooks,
     Runner,
-    RunResult,
-    RunResultStreaming,
     StopAtTools,
     TContext,
     Tool,
@@ -283,14 +281,14 @@ class SimpleAgent:
             recorder._is_complete = True
 
     # util apis
-    async def chat(self, input: str) -> RunResult:
+    async def chat(self, input: str) -> TaskRecorder:
         # TODO: set "session-level" tracing for multi-turn chat
         recorder = await self.run(input, save=True)
         run_result = recorder.get_run_result()
         AgentsUtils.print_new_items(run_result.new_items)
         return run_result
 
-    async def chat_streamed(self, input: str) -> RunResultStreaming:
+    async def chat_streamed(self, input: str) -> TaskRecorder:
         recorder = self.run_streamed(input, save=True)
         await AgentsUtils.print_stream_events(recorder.stream_events())
         return recorder
