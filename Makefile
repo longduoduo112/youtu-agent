@@ -39,4 +39,4 @@ build-ui:
 
 .PHONY: demo
 demo: build-ui
-	uv run python -m demo.demo_universal
+	uv run python -m demo.demo
