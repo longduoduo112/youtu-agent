@@ -45,6 +45,9 @@ async def main():
     match args.step:
         case "all":
             await runner.main()
+        case "rollout":
+            runner.preprocess()
+            await runner.rollout()
         case "judge":
             await runner.judge(stage="rollout")  # set stage=None to rejudge; rollout or judged incrementally
             await runner.stat()
