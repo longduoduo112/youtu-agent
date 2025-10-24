@@ -52,23 +52,23 @@ class OrchestratorAgent:
             workers[name] = SimpleAgent(config=config)
         return workers
 
-    async def run(self, input: str, history: Recorder = None) -> Recorder:
-        recorder = self.run_streamed(input, history)
+    async def run(self, input: str, history: Recorder = None, trace_id: str = None) -> Recorder:
+        recorder = self.run_streamed(input, history, trace_id)
         async for _ in recorder.stream_events():
             pass
         return recorder
 
-    def run_streamed(self, input: str, history: Recorder = None) -> Recorder:
+    def run_streamed(self, input: str, history: Recorder = None, trace_id: str = None) -> Recorder:
+        trace_id = trace_id or AgentsUtils.gen_trace_id()
         if history:
-            recorder = history.new(input=input)
+            recorder = history.new(input=input, trace_id=trace_id)
         else:
-            recorder = Recorder(input=input)
+            recorder = Recorder(input=input, trace_id=trace_id)
         recorder._run_impl_task = asyncio.create_task(self._start_streaming(recorder))
         return recorder
 
     async def _start_streaming(self, recorder: Recorder):
-        with trace(workflow_name=self.name) as tracer:
-            recorder.trace_id = tracer.trace_id  # record trace_id
+        with trace(workflow_name=self.name, trace_id=recorder.trace_id):
             try:
                 planner = await self.orchestrator.handle_input(recorder)
                 if planner:  # has a plan
