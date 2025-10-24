@@ -430,6 +430,7 @@ class WebUIAgents:
         await self.__launch(port=port, ip=ip, autoload=autoload)
 
     def launch(self, port: int = 8848, ip: str = "127.0.0.1", autoload: bool | None = None):
+        print(f"Starting server at http://{ip}:{port}/")
         asyncio.run(self.__launch(port=port, ip=ip, autoload=autoload))
 
 
