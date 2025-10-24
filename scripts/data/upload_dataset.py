@@ -38,7 +38,7 @@ def upload_dataset(file_path: str, dataset_name: str, data_format: Literal["defa
 
     dataset_samples = []
     with open(file_path, encoding="utf-8") as f:
-        for line in f:
+        for i, line in enumerate(f):
             data: dict = json.loads(line.strip())
             match data_format:
                 case "default":
@@ -47,8 +47,9 @@ def upload_dataset(file_path: str, dataset_name: str, data_format: Literal["defa
                     dataset_sample = convert_format_llamafactory(data)
                 case _:
                     raise ValueError(f"Unsupported data format: {data_format}")
-            # setup dataset name
+            # setup dataset name & index
             dataset_sample.dataset = dataset_name
+            dataset_sample.index = i
             dataset_samples.append(dataset_sample)
 
     DBService.add(dataset_samples)
