@@ -26,6 +26,7 @@ from .common import (
     AskContent,
     ErrorContent,
     Event,
+    ExampleContent,
     InitContent,
     ListAgentsContent,
     SwitchAgentContent,
@@ -33,7 +34,6 @@ from .common import (
     UserAnswer,
     UserQuery,
     UserRequest,
-    ExampleContent,
     handle_generated_agent,
     handle_new_agent,
     handle_orchestra_events,
@@ -400,7 +400,11 @@ class WebUIAgents:
             autoload = EnvUtils.get_env("UTU_WEBUI_AUTOLOAD", "false") == "true"
         return tornado.web.Application(
             [
-                (r"/ws", WebSocketHandler, {"default_config_filename": self.default_config, "example_query": self.example_query}),
+                (
+                    r"/ws",
+                    WebSocketHandler,
+                    {"default_config_filename": self.default_config, "example_query": self.example_query},
+                ),
                 (
                     r"/",
                     tornado.web.RedirectHandler,
