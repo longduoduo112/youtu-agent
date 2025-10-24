@@ -33,6 +33,7 @@ from .common import (
     UserAnswer,
     UserQuery,
     UserRequest,
+    ExampleContent,
     handle_generated_agent,
     handle_new_agent,
     handle_orchestra_events,
@@ -65,13 +66,14 @@ class Session:
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    def initialize(self, default_config_filename: str):
+    def initialize(self, default_config_filename: str, example_query: str = ""):
         self.default_config_filename = default_config_filename
         logging.info(f"initialize websocket, default config: {default_config_filename}")
         self.agent: SimpleAgent | OrchestraAgent | OrchestratorAgent | None = None
         self.history = None  # recorder for multi-turn chat. Now only used for OrchestraAgent
         self.default_config = None
         self.session = None
+        self.example_query = example_query
 
     async def prepare(self):
         if self.default_config_filename:
@@ -148,6 +150,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         content = self._get_current_agent_content()
         await self.send_event(Event(type="init", data=InitContent(**content)))
+        if self.example_query != "":
+            await self.send_event(Event(type="example", data=ExampleContent(type="example", query=self.example_query)))
 
     async def send_event(self, event: Event):
         logging.debug(f"Sending event: {event.model_dump()}")
@@ -380,7 +384,7 @@ class FileUploadHandler(tornado.web.RequestHandler):
 
 
 class WebUIAgents:
-    def __init__(self, default_config: str):
+    def __init__(self, default_config: str, example_query: str = ""):
         self.default_config = default_config
         self.workspace = EnvUtils.get_env("UTU_WEBUI_WORKSPACE_ROOT", WORKSPACE_ROOT)
         if not os.path.exists(self.workspace):
@@ -389,13 +393,14 @@ class WebUIAgents:
         # hack
         with resources.as_file(resources.files("utu_agent_ui.static").joinpath("index.html")) as static_dir:
             self.static_path = str(static_dir).replace("index.html", "")
+        self.example_query = example_query
 
     def make_app(self, autoload: bool | None = None) -> tornado.web.Application:
         if autoload is None:
             autoload = EnvUtils.get_env("UTU_WEBUI_AUTOLOAD", "false") == "true"
         return tornado.web.Application(
             [
-                (r"/ws", WebSocketHandler, {"default_config_filename": self.default_config}),
+                (r"/ws", WebSocketHandler, {"default_config_filename": self.default_config, "example_query": self.example_query}),
                 (
                     r"/",
                     tornado.web.RedirectHandler,

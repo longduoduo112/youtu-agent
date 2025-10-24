@@ -16,10 +16,10 @@ if __name__ == "__main__":
     parser.add_argument("--autoload", type=bool, default=DEFAULT_AUTOLOAD)
     args = parser.parse_args()
 
-    # data_dir = pathlib.Path(__file__).parent / "data"
-    # data_dir.mkdir(exist_ok=True)
-    # question = "deepseek-v3.1有哪些亮点更新?"
+    data_dir = pathlib.Path(__file__).parent / "data"
+    data_dir.mkdir(exist_ok=True)
+    question = "deepseek-v3.1有哪些亮点更新?"
 
-    webui = WebUIAgents(default_config=DEFAULT_CONFIG)
+    webui = WebUIAgents(default_config=DEFAULT_CONFIG, example_query=question)
     print(f"Server started at http://{args.ip}:{args.port}/")
     webui.launch(ip=args.ip, port=args.port, autoload=args.autoload)

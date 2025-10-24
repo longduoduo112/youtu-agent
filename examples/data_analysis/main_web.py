@@ -22,11 +22,11 @@ def main():
     # Run the agent with a sample question
     # data from https://www.kaggle.com/datasets/joannanplkrk/its-raining-cats
 
-    # fn = pathlib.Path(__file__).parent / "demo_data_cat_breeds_clean.csv"
-    # assert fn.exists(), f"File {fn} does not exist."
-    # question = f"请分析位于`{fn}`的猫品种数据，提取有价值的信息。"
+    fn = pathlib.Path(__file__).parent / "demo_data_cat_breeds_clean.csv"
+    assert fn.exists(), f"File {fn} does not exist."
+    question = f"请分析位于`{fn}`的猫品种数据，提取有价值的信息。"
 
-    webui = WebUIAgents(default_config="examples/data_analysis")
+    webui = WebUIAgents(default_config="examples/data_analysis", example_query=question)
     print(f"Server started at http://{args.ip}:{args.port}/")
     webui.launch(ip=args.ip, port=args.port, autoload=args.autoload)
 

@@ -15,11 +15,11 @@ if __name__ == "__main__":
     parser.add_argument("--autoload", type=bool, default=DEFAULT_AUTOLOAD)
     args = parser.parse_args()
 
-    # data_dir = pathlib.Path(__file__).parent / "data"
-    # data_dir.mkdir(exist_ok=True)
-    # paper_url = "https://www.arxiv.org/pdf/2507.12883"
-    # question = f"请分析论文{paper_url}，整理出它的相关工作，并且进行简单的比较。"
+    data_dir = pathlib.Path(__file__).parent / "data"
+    data_dir.mkdir(exist_ok=True)
+    paper_url = "https://www.arxiv.org/pdf/2507.12883"
+    question = f"请分析论文{paper_url}，整理出它的相关工作，并且进行简单的比较。"
 
-    webui = WebUIAgents(default_config=DEFAULT_CONFIG)
+    webui = WebUIAgents(default_config=DEFAULT_CONFIG, example_query=question)
     print(f"Server started at http://{args.ip}:{args.port}/")
     webui.launch(ip=args.ip, port=args.port, autoload=args.autoload)
