@@ -1,7 +1,36 @@
+"""
+DEPRECATED: This module is deprecated and will be removed in a future release.
+
+This implementation has been superseded by the newer implementation in webui_agents.py.
+Please migrate to the new implementation at your earliest convenience.
+
+Migration Guide:
+- Replace WebUIChatbot with the corresponding implementation in webui_agents.py
+- Update your code to use the new API endpoints and components
+- Refer to the project documentation for the latest best practices
+"""
+
 import asyncio
 import json
+import sys
 import traceback
+import warnings
 from importlib import resources
+
+# Add a visible deprecation warning that will be shown when the module is imported
+warnings.simplefilter('always', DeprecationWarning)  # Ensure deprecation warnings are shown
+warnings.warn(
+    "The webui_chatbot module is deprecated and will be removed in a future release. "
+    "Please migrate to the webui_agents implementation.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+# Print a warning to stderr for better visibility
+print("WARNING: The webui_chatbot module is deprecated and will be removed in a future release. "
+      "Please migrate to the webui_agents implementation.", 
+      file=sys.stderr)
+
 
 import agents as ag
 import tornado.web
