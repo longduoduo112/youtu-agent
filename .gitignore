@@ -66,6 +66,8 @@ wheels/
 # Misc
 # temp files
 # _*
+.NOTES
 # temp config
 test.yaml
 pgs
+CLAUDE.md
