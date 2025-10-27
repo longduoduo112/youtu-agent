@@ -29,6 +29,7 @@ import {
   ExperimentOutlined,
   RadarChartOutlined
 } from "@ant-design/icons";
+import { useThemeStore } from "@/lib/theme";
 
 type Evaluation = {
   id: number;
@@ -85,7 +86,8 @@ function HomePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleTheme } = useThemeStore();
+
   const urlTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState<string>(urlTab || "evaluations");
 
@@ -150,12 +152,9 @@ function HomePageContent() {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    // 安全地检查 localStorage 和 document
     const savedTheme = typeof localStorage !== 'undefined' ? localStorage.getItem("theme") : null;
     const initialDarkMode = savedTheme === "dark";
-    setIsDarkMode(initialDarkMode);
 
-    // 安全地设置 body className
     if (typeof document !== 'undefined') {
       document.body.className = initialDarkMode ? "dark-mode" : "light-mode";
     }
@@ -707,7 +706,7 @@ function HomePageContent() {
                     checkedChildren={<BulbFilled />}
                     unCheckedChildren={<BulbOutlined />}
                     checked={isDarkMode}
-                    onChange={setIsDarkMode}
+                    onChange={toggleTheme}
                 />
                 <span>{isDarkMode ? "Dark" : "Light"}</span>
               </Space>
@@ -788,7 +787,7 @@ function HomePageContent() {
                         <Col span={8}>
                           <Card
                               bordered={false}
-                              className={`rounded-lg shadow-sm ${isDarkMode ? "bg-[#3c3d32] border border-[#49483e]" : "bg-gray极狐-50"}`}
+                              className={`rounded-lg shadow-sm ${isDarkMode ? "bg-[#3c3d32] border border-[#49483e]" : "bg-gray-50"}`}
                           >
                             <Statistic
                                 title="Rollout"
