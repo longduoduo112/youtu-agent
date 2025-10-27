@@ -1,4 +1,5 @@
 import asyncio
+import pathlib
 from collections.abc import Callable
 from contextlib import AsyncExitStack
 from typing import Any, Literal
@@ -62,6 +63,7 @@ class SimpleAgent:
         self.tool_use_behavior: Literal["run_llm_again", "stop_on_first_tool"] | StopAtTools = tool_use_behavior
         self.context_manager: BaseContextManager = None
         self.env: BaseEnv = None
+        self.workspace_dir: str = ""
         self.current_agent: Agent[TContext] = None  # move to task recorder?
         self.input_items: list[TResponseInputItem] = []
         self.run_hooks: RunHooks = get_run_hooks(self.config)
@@ -127,24 +129,37 @@ class SimpleAgent:
         await self.env.cleanup()
         self._initialized = False
 
+    def setup_workspace(self, workspace_dir: str | pathlib.Path):
+        """Setup workspace for toolkits that need it"""
+        assert pathlib.Path(workspace_dir).exists()
+        self.workspace_dir = str(workspace_dir)
+        self._setup_workspace_for_toolkits()
+
+    def _setup_workspace_for_toolkits(self):
+        for toolkit in self._toolkits.values():
+            if hasattr(toolkit, "setup_workspace"):
+                toolkit.setup_workspace(self.workspace_dir)
+
     async def get_tools(self) -> list[Tool]:
         if self.tools:
             return self.tools
 
         if self.toolkits:
             await self._load_toolkits_config()
-            return self.tools
-
-        tools_list: list[Tool] = []
-        tools_list += await self.env.get_tools()  # add env tools
-        # TODO: handle duplicate tool names
-        for _, toolkit_config in self.config.toolkits.items():
-            toolkit = await self._load_toolkit(toolkit_config)
-            if toolkit_config.mode in ["customized", "builtin"]:
-                tools_list.extend(toolkit.get_tools_in_agents())
-        tool_names = [tool.name for tool in tools_list]
-        logger.info(f"Loaded {len(tool_names)} tools: {tool_names}")
-        self.tools = tools_list
+        else:
+            tools_list: list[Tool] = []
+            tools_list += await self.env.get_tools()  # add env tools
+            # TODO: handle duplicate tool names
+            for _, toolkit_config in self.config.toolkits.items():
+                toolkit = await self._load_toolkit(toolkit_config)
+                if toolkit_config.mode in ["customized", "builtin"]:
+                    tools_list.extend(toolkit.get_tools_in_agents())
+            tool_names = [tool.name for tool in tools_list]
+            logger.info(f"Loaded {len(tool_names)} tools: {tool_names}")
+            self.tools = tools_list
+        # setup workspace if needed
+        if self.workspace_dir:
+            self._setup_workspace_for_toolkits()
         return self.tools
 
     async def _load_toolkits_config(self):
