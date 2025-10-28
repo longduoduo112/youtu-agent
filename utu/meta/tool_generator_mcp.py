@@ -154,7 +154,6 @@ class ToolGenerator:
     async def _process_streamed(self, run_result_streaming: RunResultStreaming, task_recorder: TaskRecorder):
         async for event in run_result_streaming.stream_events():
             task_recorder._event_queue.put_nowait(event)
-        # self.llm.input_items = run_result_streaming.to_input_list()
 
     async def run_debug(self, workspace_dir: str, task_recorder: TaskRecorder = None) -> TaskRecorder:
         task_recorder = task_recorder or TaskRecorder(name=workspace_dir)
@@ -175,23 +174,3 @@ class ToolGenerator:
             workspace_dir = pathlib.Path(DIR_ROOT / "configs/tools/generated" / workspace_dir)
         self.debugger.setup_workspace(workspace_dir)
         return self.debugger.run_streamed(f"当前目录: {workspace_dir}")
-
-        # task_recorder = TaskRecorder()
-        # task_recorder.workspace_dir = str(DIR_ROOT / "configs/tools/generated" / workspace_dir)
-        # task_recorder._run_impl_task = asyncio.create_task(self._debug_tool(task_recorder))
-        # return task_recorder
-
-    # async def _debug_tool(self, task_recorder: TaskRecorder):
-    #     """Internal method to debug the generated tool."""
-    #     import pathlib
-
-    #     workspace_dir = pathlib.Path(task_recorder.workspace_dir)
-    #     assert workspace_dir.exists(), f"Workspace directory does not exist: {workspace_dir}"
-
-    #     async with self.debugger as agent:
-    #         agent._toolkits["bash"].setup_workspace(workspace_dir)
-    #         agent._toolkits["file_edit"].setup_workspace(workspace_dir)
-    #         res = agent.run_streamed(f"当前目录: {workspace_dir}")
-    #         async for event in res.stream_events():
-    #             task_recorder._event_queue.put_nowait(event)
-    #         self.debugger.input_items = res.to_input_list()
