@@ -81,6 +81,7 @@ documents = [
 ]
 env = [
     "e2b>=2.5.0",
+    "e2b-code-interpreter>=2.2.1",
 ]
 gaia = [
     "astor>=0.8.1",

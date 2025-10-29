@@ -911,6 +911,20 @@ wheels = [
 ]
 
 [[package]]
+name = "e2b-code-interpreter"
+version = "2.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "attrs" },
+    { name = "e2b" },
+    { name = "httpx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0b/5d/ab04de270af88ea5901e12f4c730f3f185e70f8d0106ebeedd4c03189d68/e2b_code_interpreter-2.2.1.tar.gz", hash = "sha256:e792a30c9751e29173fbd2f7f9dda6a3dab85eedf238c9c8ca873607e00427c6", size = 10276, upload-time = "2025-10-27T15:04:02.186Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b2/4a/9ea8a7e19e3792270c9ece8e1ce5c812916816fad0574a305dca7e4d5994/e2b_code_interpreter-2.2.1-py3-none-any.whl", hash = "sha256:1c7e1102107cbcc921d6920e9c699ec39f57fc39bc037d2cc6b6258c7246d4df", size = 13141, upload-time = "2025-10-27T15:04:00.838Z" },
+]
+
+[[package]]
 name = "emoji"
 version = "2.14.1"
 source = { registry = "https://pypi.org/simple" }
@@ -4889,6 +4903,7 @@ documents = [
 ]
 env = [
     { name = "e2b" },
+    { name = "e2b-code-interpreter" },
 ]
 gaia = [
     { name = "astor" },
@@ -4972,7 +4987,10 @@ dev = [
     { name = "twine", specifier = ">=6.2.0" },
 ]
 documents = [{ name = "pymupdf", specifier = ">=1.26.3" }]
-env = [{ name = "e2b", specifier = ">=2.5.0" }]
+env = [
+    { name = "e2b", specifier = ">=2.5.0" },
+    { name = "e2b-code-interpreter", specifier = ">=2.2.1" },
+]
 gaia = [
     { name = "astor", specifier = ">=0.8.1" },
     { name = "docx2markdown", specifier = ">=0.1.1" },
