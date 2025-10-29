@@ -215,6 +215,7 @@ class SimpleAgent:
         return {
             "context_manager": self.context_manager,
             "env": self.env,
+            "agent_config": self.config,
         }
 
     def _prepare_run_kwargs(self, input: str | list[TResponseInputItem]) -> dict:
