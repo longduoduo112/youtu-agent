@@ -860,6 +860,15 @@ wheels = [
 ]
 
 [[package]]
+name = "dockerfile-parse"
+version = "2.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/92/df/929ee0b5d2c8bd8d713c45e71b94ab57c7e11e322130724d54f469b2cd48/dockerfile-parse-2.0.1.tar.gz", hash = "sha256:3184ccdc513221983e503ac00e1aa504a2aa8f84e5de673c46b0b6eee99ec7bc", size = 24556, upload-time = "2023-07-18T13:36:07.897Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7a/6c/79cd5bc1b880d8c1a9a5550aa8dacd57353fa3bb2457227e1fb47383eb49/dockerfile_parse-2.0.1-py2.py3-none-any.whl", hash = "sha256:bdffd126d2eb26acf1066acb54cb2e336682e1d72b974a40894fac76a4df17f6", size = 14845, upload-time = "2023-07-18T13:36:06.052Z" },
+]
+
+[[package]]
 name = "docutils"
 version = "0.22.2"
 source = { registry = "https://pypi.org/simple" }
@@ -879,6 +888,26 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/06/be/692425e45455b1bbff7ad0b9fa2fab31ac3f9da13f210ded06c0c99158f5/docx2markdown-0.1.1.tar.gz", hash = "sha256:177e7ca0c998139b9afb9ffbe9a3be05a27d60664ac602b38de643e7b343593d", size = 8256, upload-time = "2024-11-23T21:11:45.015Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d2/f5/970f7c2f64331891ff8b8c1863a793779e4fc784dbd210e8ae3712bcfd0e/docx2markdown-0.1.1-py3-none-any.whl", hash = "sha256:a97d413e6a225d4a0932cc8660b92f10f5de28f0436bc18ee12ef3961cd4b2b1", size = 8393, upload-time = "2024-11-23T21:11:43.452Z" },
+]
+
+[[package]]
+name = "e2b"
+version = "2.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "attrs" },
+    { name = "dockerfile-parse" },
+    { name = "httpcore" },
+    { name = "httpx" },
+    { name = "packaging" },
+    { name = "protobuf" },
+    { name = "python-dateutil" },
+    { name = "rich" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bc/33/282e52dd7638534a6cec8002c2ff93751bf4640e18526d311e46aeb3684d/e2b-2.5.0.tar.gz", hash = "sha256:c365f84d4ffae1fbe867354d7af20f64c6aa4bac870789d6bf855606bdf093d0", size = 108006, upload-time = "2025-10-28T17:10:03.816Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/9a/2388b9c1a1df781338d1aa0923201b3be99607050b51ca98e42859de9012/e2b-2.5.0-py3-none-any.whl", hash = "sha256:a0efb483716ff62b128a15705829f765fc4c910e5e1b3d57981e6e4a3c00055c", size = 184880, upload-time = "2025-10-28T17:10:02.462Z" },
 ]
 
 [[package]]
@@ -4858,6 +4887,9 @@ dev = [
 documents = [
     { name = "pymupdf" },
 ]
+env = [
+    { name = "e2b" },
+]
 gaia = [
     { name = "astor" },
     { name = "docx2markdown" },
@@ -4940,6 +4972,7 @@ dev = [
     { name = "twine", specifier = ">=6.2.0" },
 ]
 documents = [{ name = "pymupdf", specifier = ">=1.26.3" }]
+env = [{ name = "e2b", specifier = ">=2.5.0" }]
 gaia = [
     { name = "astor", specifier = ">=0.8.1" },
     { name = "docx2markdown", specifier = ">=0.1.1" },
