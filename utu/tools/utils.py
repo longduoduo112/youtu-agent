@@ -14,6 +14,7 @@ from ..config import ToolkitConfig
 # ------------------------------------------------------------------------------
 # e2b
 class E2BUtils:
+    from e2b.sandbox.commands.command_handle import CommandExitException, CommandResult
     from e2b_code_interpreter.models import Execution
 
     @classmethod
@@ -30,6 +31,27 @@ class E2BUtils:
             "result": serialize_results(execution.results),
             "logs": logs_data,  # execution.logs.to_json(),
             "error": error_data,  # execution.error.to_json() if execution.error else None
+        }
+        return json.dumps(result, ensure_ascii=False)
+
+    @classmethod
+    def command_result_to_str(cls, command_result: CommandResult) -> str:
+        """Convert e2b CommandResult to string."""
+        result = {
+            "stdout": command_result.stdout,
+            "stderr": command_result.stderr,
+            "exit_code": command_result.exit_code,
+            "error": command_result.error,
+        }
+        return json.dumps(result, ensure_ascii=False)
+
+    @classmethod
+    def command_exit_exception_to_str(cls, command_exception: CommandExitException) -> str:
+        result = {
+            "stdout": command_exception.stdout,
+            "stderr": command_exception.stderr,
+            "exit_code": command_exception.exit_code,
+            "error": command_exception.error,
         }
         return json.dumps(result, ensure_ascii=False)
 
