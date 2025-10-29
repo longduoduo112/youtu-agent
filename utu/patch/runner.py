@@ -1,7 +1,13 @@
+"""
+- add "context_manager" logic for `_run_single_turn` and `_run_single_turn_streamed`
+- add termination logic based on `termination_max_tokens` in `ModelConfigs`
+"""
+
 import asyncio
 import logging
 from typing import cast
 
+# , ResponseReasoningItem, ResponseCustomToolCall, McpCall
 from agents import (
     Agent,
     ItemHelpers,
@@ -20,8 +26,14 @@ from agents.run import _TOOL_CALL_TYPES, AgentRunner, AgentToolUseTracker, RunRe
 from agents.stream_events import RawResponsesStreamEvent, RunItemStreamEvent
 from agents.usage import Usage
 from agents.util import _coro
-from openai.types.responses import ResponseCompletedEvent, ResponseOutputItemDoneEvent
+from openai.types.responses import (
+    ResponseCompletedEvent,
+    ResponseFunctionToolCall,
+    ResponseOutputItemDoneEvent,
+    ResponseOutputMessage,
+)
 
+from ..config import AgentConfig
 from ..context import BaseContextManager
 
 logger = logging.getLogger(__name__)
@@ -61,12 +73,8 @@ class UTUAgentRunner(AgentRunner):
         input = ItemHelpers.input_to_new_input_list(original_input)
         input.extend([generated_item.to_input_item() for generated_item in generated_items])
 
-        # FIXME: set context manage as a hook?
         # ADD: context manager
-        if context_wrapper.context:
-            context_manager: BaseContextManager = context_wrapper.context.get("context_manager", None)
-            input = context_manager.preprocess(input, context_wrapper)
-        # print(f"< [DEBUG] input: {input}")
+        input = cls._context_manager_preprocess(input, context_wrapper)
 
         new_response = await cls._get_new_response(
             agent,
@@ -83,6 +91,9 @@ class UTUAgentRunner(AgentRunner):
             conversation_id,
             prompt_config,
         )
+
+        # ADD: terminate when context too long
+        new_response = cls._check_too_long(new_response, context_wrapper)
 
         return await cls._get_single_step_result_from_response(
             agent=agent,
@@ -141,9 +152,7 @@ class UTUAgentRunner(AgentRunner):
         input.extend([item.to_input_item() for item in streamed_result.new_items])
 
         # ADD: context manager
-        if context_wrapper.context:
-            context_manager: BaseContextManager = context_wrapper.context.get("context_manager", None)
-            input = context_manager.preprocess(input, context_wrapper)
+        input = cls._context_manager_preprocess(input, context_wrapper)
 
         # THIS IS THE RESOLVED CONFLICT BLOCK
         filtered = await cls._maybe_filter_model_input(
@@ -178,6 +187,7 @@ class UTUAgentRunner(AgentRunner):
             prompt=prompt_config,
         ):
             if isinstance(event, ResponseCompletedEvent):
+                logger.debug(f"> [DEBUG] ResponseCompletedEvent: {event}")
                 usage = (
                     Usage(
                         requests=1,
@@ -198,6 +208,7 @@ class UTUAgentRunner(AgentRunner):
                 context_wrapper.usage.add(usage)
 
             if isinstance(event, ResponseOutputItemDoneEvent):
+                logger.debug(f"> [DEBUG] ResponseOutputItemDoneEvent: {event}")
                 output_item = event.item
 
                 if isinstance(output_item, _TOOL_CALL_TYPES):
@@ -228,6 +239,9 @@ class UTUAgentRunner(AgentRunner):
         # 2. At this point, the streaming is complete for this turn of the agent loop.
         if not final_response:
             raise ModelBehaviorError("Model did not produce a final response!")
+
+        # ADD: terminate when context too long
+        final_response = cls._check_too_long(final_response, context_wrapper)
 
         # 3. Now, we can process the turn as we do in the non-streaming case
         single_step_result = await cls._get_single_step_result_from_response(
@@ -269,3 +283,41 @@ class UTUAgentRunner(AgentRunner):
         filtered_result = _dc.replace(single_step_result, new_step_items=items_to_filter)
         RunImpl.stream_step_result_to_queue(filtered_result, streamed_result._event_queue)
         return single_step_result
+
+    @classmethod
+    def _context_manager_preprocess(
+        cls, input: list[TResponseInputItem], context_wrapper: RunContextWrapper[TContext]
+    ) -> list[TResponseInputItem]:
+        if context_wrapper.context:
+            context_manager: BaseContextManager = context_wrapper.context.get("context_manager", None)
+            input = context_manager.preprocess(input, context_wrapper)
+        return input
+        # print(f"< [DEBUG] input: {input}")
+
+    @classmethod
+    def _check_too_long(
+        cls, new_response: ModelResponse, context_wrapper: RunContextWrapper[TContext]
+    ) -> ModelResponse:
+        # ADD: terminate when response too long. before `_get_single_step_result_from_response`
+        """Check if the context is too long. If the total_tokens exceed the max limit, terminate this rollout
+        (by removing all tool calls from the response)"""
+        config: AgentConfig = context_wrapper.context.get("agent_config", None)
+        if not config or not config.model.termination_max_tokens:
+            return new_response
+
+        MAX_TOKENS = config.model.termination_max_tokens
+        total_tokens = new_response.usage.total_tokens if new_response.usage else 0
+        logger.warning(f"> [DEBUG] total_tokens: {total_tokens}, MAX_TOKENS: {MAX_TOKENS}")
+        if total_tokens > MAX_TOKENS:
+            output = []
+            for item in new_response.output:
+                if isinstance(item, ResponseOutputMessage):
+                    output.append(item)
+                elif isinstance(item, ResponseFunctionToolCall):
+                    pass
+            logger.warning(
+                f"Response truncated due to exceeding max token limit of {MAX_TOKENS}.\n"
+                f"  Raw response: {new_response.output}."
+            )
+            new_response.output = output
+        return new_response
