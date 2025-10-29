@@ -13,6 +13,8 @@ from PIL import Image
 from pptx import Presentation
 from pydantic import BaseModel
 from utils import delete_shape, duplicate_slide, find_shape_with_name_except, replace_picture_keep_format
+from pptx.enum.shapes import MSO_SHAPE_TYPE
+from pptx.shapes.group import GroupShape
 
 TYPE_MAP = {
     "content": 0,
@@ -504,7 +506,19 @@ def handle_image(image_url: str, target_shape, slide):
     # center the image
     left += (width - image_width) / 2
     top += (height - image_height) / 2
-    slide.shapes.add_picture(image_url, left, top, image_width, image_height)
+
+    # get parent
+    try:
+        parent = target_shape._parent._parent
+        # check if parent is shape group
+        if parent.shape_type == MSO_SHAPE_TYPE.GROUP:
+            # get parent left and top
+            parent_left, parent_top = parent.left, parent.top
+            slide.shapes.add_picture(image_url, left + parent_left, top + parent_top, image_width, image_height)
+        else:
+            slide.shapes.add_picture(image_url, left, top, image_width, image_height)
+    except AttributeError as e:
+        slide.shapes.add_picture(image_url, left, top, image_width, image_height)
 
     # remove the placeholder
     delete_shape(target_shape)
