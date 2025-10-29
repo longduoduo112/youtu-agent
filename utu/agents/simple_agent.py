@@ -185,7 +185,7 @@ class SimpleAgent:
         if toolkit_config.env_mode == "e2b":
             # setup e2b sandbox for toolkits that need it
             assert isinstance(self.env, E2BEnv), "E2B env is required for e2b toolkit!"
-            toolkit.setup_e2b_sandbox(self.env.sandbox)
+            toolkit.setup_e2b_env(self.env)
         return toolkit
 
     async def _load_builtin_toolkit(self, toolkit_config: ToolkitConfig) -> AsyncBaseToolkit:

@@ -20,7 +20,7 @@ async def get_env(config: AgentConfig, trace_id: str) -> BaseEnv:
             print(f"> Workspace: {workspace}")
             return ShellLocalEnv(workspace)
         case "e2b":
-            return E2BEnv()
+            return E2BEnv(config.env.config)
         case "browser_docker":
             return BrowserEnv(trace_id)
         case "browser_e2b":
