@@ -19,6 +19,8 @@ class ToolkitConfig(ConfigBaseModel):
 
     mode: Literal["builtin", "customized", "mcp"] = "builtin"
     """Toolkit mode."""
+    env_mode: Literal["local", "e2b"] = "local"
+    """Environment mode for the toolkit."""
     name: str | None = None
     """Toolkit name."""
     activated_tools: list[str] | None = None

@@ -1,0 +1,14 @@
+# @package _global_
+defaults:
+  - /tools/e2b/python_executor@toolkits.PythonTool
+  - _self_
+
+env:
+  name: e2b
+
+agent:
+  name: e2b_python_agent
+  instructions: |-
+    You are a helpful assistant that can use python.
+
+max_turns: 100

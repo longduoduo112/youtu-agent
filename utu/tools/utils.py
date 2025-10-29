@@ -1,3 +1,4 @@
+import json
 import re
 from collections.abc import Callable
 
@@ -8,6 +9,30 @@ from agents.mcp import MCPServer, MCPServerSse, MCPServerStdio, MCPServerStreama
 from mcp import Tool as MCPTool
 
 from ..config import ToolkitConfig
+
+
+# ------------------------------------------------------------------------------
+# e2b
+class E2BUtils:
+    from e2b_code_interpreter.models import Execution
+
+    @classmethod
+    def execution_to_str(cls, execution: Execution) -> str:
+        """Convert e2b Execution to string.
+        The official .to_json() is not good for Chinese output!"""
+        from e2b_code_interpreter.models import serialize_results
+
+        logs = execution.logs
+        logs_data = {"stdout": logs.stdout, "stderr": logs.stderr}
+        error = execution.error
+        error_data = {"name": error.name, "value": error.value, "traceback": error.traceback} if error else None
+        result = {
+            "result": serialize_results(execution.results),
+            "logs": logs_data,  # execution.logs.to_json(),
+            "error": error_data,  # execution.error.to_json() if execution.error else None
+        }
+        return json.dumps(result, ensure_ascii=False)
+
 
 # ------------------------------------------------------------------------------
 # MCP
