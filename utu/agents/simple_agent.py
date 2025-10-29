@@ -26,7 +26,7 @@ from ..db import DBService, TrajectoryModel
 from ..env import BaseEnv, get_env
 from ..hooks import get_run_hooks
 from ..tools import TOOLKIT_MAP, AsyncBaseToolkit
-from ..tools.utils import get_mcp_server
+from ..tools.utils import AgentsMCPUtils
 from ..utils import AgentsUtils, get_logger, load_class_from_file
 from .common import QueueCompleteSentinel, TaskRecorder
 
@@ -198,7 +198,7 @@ class SimpleAgent:
 
     async def _load_mcp_server(self, toolkit_config: ToolkitConfig) -> MCPServer:
         logger.info(f"Loading MCP server `{toolkit_config.name}` with params {toolkit_config.config}")
-        mcp_server = get_mcp_server(toolkit_config)
+        mcp_server = AgentsMCPUtils.get_mcp_server(toolkit_config)
         server = await self._mcps_exit_stack.enter_async_context(mcp_server)
         self._mcp_servers.append(server)
         return server
