@@ -301,6 +301,8 @@ class UTUAgentRunner(AgentRunner):
         # ADD: terminate when response too long. before `_get_single_step_result_from_response`
         """Check if the context is too long. If the total_tokens exceed the max limit, terminate this rollout
         (by removing all tool calls from the response)"""
+        if context_wrapper.context is None:
+            return new_response
         config: AgentConfig = context_wrapper.context.get("agent_config", None)
         if not config or not config.model.termination_max_tokens:
             return new_response
