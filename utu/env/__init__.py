@@ -24,7 +24,7 @@ async def get_env(config: AgentConfig, trace_id: str) -> BaseEnv:
         case "browser_docker":
             return BrowserEnv(trace_id)
         case "browser_e2b":
-            return BrowserE2BEnv()
+            return BrowserE2BEnv(config.env.config)
         case "browser_tione":
             return BrowserTioneEnv(config.env.config)
         case _:

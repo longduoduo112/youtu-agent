@@ -13,21 +13,24 @@ class BrowserE2BEnv(BasicEnv):
     """Browser environment for agents.
     Here we used TencentCloud's agend sandbox service. https://cloud.tencent.com/product/agentsandbox"""
 
-    def __init__(self):
-        from e2b import Sandbox
-
-        self.sandbox: Sandbox = Sandbox.create(template="browser-v1", timeout=3600)
-        logger.info(f"browser sandbox created: {self.sandbox.sandbox_id}")
+    def __init__(self, config: dict = None):
+        self.config = config or {}
 
     async def build(self):
         """Build the environment. We use docker to run a browser container."""
+        from e2b import AsyncSandbox
+
+        # start browser sandbox
+        self.sandbox: AsyncSandbox = await AsyncSandbox.create(template="browser-v1", timeout=3600)
         sandbox_url = self.sandbox.get_host(9000)
         novnc_url = (
             f"https://{sandbox_url}/novnc/vnc_lite.html?&path=websockify?access_token={self.sandbox._envd_access_token}"
         )
+        logger.info(f"browser sandbox created: {self.sandbox.sandbox_id}")
         logger.info(f"vnc url: {novnc_url}")
         cdp_url = f"https://{sandbox_url}/cdp"
-        # run
+
+        # run mcp server
         config = ToolkitConfig(
             mode="mcp",
             mcp_transport="stdio",

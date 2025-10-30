@@ -15,8 +15,11 @@ class E2BEnv(BasicEnv):
         """Build the environment."""
         from e2b_code_interpreter import AsyncSandbox
 
-        self.sandbox = await AsyncSandbox.create(template="code-interpreter-v1", timeout=3600)
+        self.sandbox: AsyncSandbox = await AsyncSandbox.create(template="code-interpreter-v1", timeout=3600)
         logger.info(f"E2B sandbox created with id: {self.sandbox.sandbox_id}")
+
+    async def cleanup(self):
+        await self.sandbox.kill()
 
     def get_state(self) -> str:
         return ""
