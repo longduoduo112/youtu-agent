@@ -19,7 +19,7 @@ from ..agents import SimpleAgent
 from ..agents.common import DataClassWithStreamEvents, QueueCompleteSentinel
 from ..config import ConfigLoader
 from ..tools import TOOLKIT_MAP, UserInteractionToolkit
-from ..tools.utils import get_mcp_tools_schema, get_tools_schema
+from ..tools.utils import AgentsMCPUtils, get_tools_schema
 from ..utils import DIR_ROOT, FileUtils, get_logger
 
 logger = get_logger(__name__)
@@ -188,7 +188,7 @@ class SimpleAgentGenerator:
                 case "builtin":
                     tools_schema = get_tools_schema(TOOLKIT_MAP[toolkit_name])
                 case "mcp":
-                    tools_schema = await get_mcp_tools_schema(config)
+                    tools_schema = await AgentsMCPUtils.get_mcp_tools_schema(config)
                 case _:
                     raise ValueError(f"Unsupported toolkit mode: {config.mode}")
             tools_schema_by_toolkit[toolkit_name] = tools_schema

@@ -79,6 +79,10 @@ dev = [
 documents = [
     "pymupdf>=1.26.3",
 ]
+env = [
+    "e2b>=2.5.0",
+    "e2b-code-interpreter>=2.2.1",
+]
 gaia = [
     "astor>=0.8.1",
     "docx2markdown>=0.1.1",
