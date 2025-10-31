@@ -1,6 +1,6 @@
 [project]
 name = "youtu-agent"
-version = "0.1.2"
+version = "0.1.3"
 description = "Youtu-Agent is a simple but powerful framework for building, running, and evaluating agents."
 authors = [
     {name = "easonsshi", email = "easonsshi@tencent.com"}
@@ -120,7 +120,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["utu"]
-exclude = ["utu/ui"]
+# exclude = ["utu/ui"]
 # only-include = ["utu/utils"]
 
 

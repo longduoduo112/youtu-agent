@@ -145,3 +145,9 @@ class FileUtils:
             else:
                 raise ValueError(f"Search text not found in content: {search_text[:50]}...")
         return modified_content
+
+    @staticmethod
+    def file_exists(file_path: str | pathlib.Path) -> bool:
+        if isinstance(file_path, str):
+            file_path = pathlib.Path(file_path)
+        return file_path.exists()

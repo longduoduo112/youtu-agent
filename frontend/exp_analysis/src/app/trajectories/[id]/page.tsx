@@ -8,13 +8,18 @@ import {
     Tabs,
     ConfigProvider,
     Collapse,
+    theme,
+    Switch,
+    Space
 } from "antd";
 import {
-    ArrowLeftOutlined
+    ArrowLeftOutlined,
+    BulbOutlined,
+    BulbFilled
 } from "@ant-design/icons";
 import ReactJson from "react-json-view";
 import InfoBlock from "@/components/InfoBlock";
-import ThemeToggle from "@/components/ThemeToggle";
+import { useThemeStore } from "@/lib/theme";
 
 type Trajectory = {
     id: number;
@@ -52,21 +57,24 @@ export default function TrajectoryDetailPage() {
     const params = useParams();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const {id} = params;
+    const { id } = params;
+
+    const { isDarkMode, toggleTheme } = useThemeStore();
+
     const [trajectory, setTrajectory] = useState<Trajectory | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [parsedTrajectory, setParsedTrajectory] = useState<RoleTrajectory[] | null>(null);
     const [viewMode, setViewMode] = useState<"formatted" | "json">("formatted");
-    const [isDarkMode, setIsDarkMode] = useState(false);
     const [expandedChildKeys, setExpandedChildKeys] = useState<Record<string, boolean>>({});
     const [isJsonExpanded, setIsJsonExpanded] = useState(false);
+    const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme");
         const initialDarkMode = savedTheme === "dark";
-        setIsDarkMode(initialDarkMode);
         document.body.className = initialDarkMode ? "dark-mode" : "light-mode";
+        setIsThemeLoaded(true);
     }, []);
 
     useEffect(() => {
@@ -105,6 +113,10 @@ export default function TrajectoryDetailPage() {
                 });
         }
     }, [id]);
+
+    if (!isThemeLoaded) {
+        return <div className="container mx-auto p-4">Loading theme...</div>;
+    }
 
     if (loading) {
         return <div className="container mx-auto p-4">Loading...</div>;
@@ -150,7 +162,7 @@ export default function TrajectoryDetailPage() {
                                         type="link"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            const newChildKeys = {...expandedChildKeys};
+                                            const newChildKeys = { ...expandedChildKeys };
                                             childKeys.forEach(key => {
                                                 newChildKeys[key] = !isAllExpanded;
                                             });
@@ -161,18 +173,13 @@ export default function TrajectoryDetailPage() {
                                     </Button>
                                 </div>
                             }
-                            className={`mb-2 ${
-                                isDarkMode
-                                    ? "bg-[#3c3d32] text-[#f8f8f2]"
-                                    : "bg-white text-gray-800"
-                            }`}
                         >
                             <Collapse
                                 accordion={false}
                                 activeKey={childKeys.filter(key => expandedChildKeys[key])}
                                 onChange={(keys) => {
                                     const newKeys = Array.isArray(keys) ? keys : [keys];
-                                    const newState = {...expandedChildKeys};
+                                    const newState = { ...expandedChildKeys };
 
                                     childKeys.forEach(key => {
                                         newState[key] = newKeys.includes(key);
@@ -188,11 +195,6 @@ export default function TrajectoryDetailPage() {
                                         <Collapse.Panel
                                             key={childKey}
                                             header={`${roleIndex + 1}.${entryIndex + 1}. ${entry.role.toUpperCase()}`}
-                                            className={`mb-2 ${
-                                                isDarkMode
-                                                    ? "bg-[#272822] text-[#f8f8f2]"
-                                                    : "bg-gray-100 text-gray-800"
-                                            }`}
                                             forceRender={true}
                                         >
                                             {entry.content && (
@@ -207,8 +209,8 @@ export default function TrajectoryDetailPage() {
                                                                 : "bg-gray-50 text-gray-800"
                                                         }`}
                                                     >
-                            {entry.content}
-                          </pre>
+                                                        {entry.content}
+                                                    </pre>
                                                 </div>
                                             )}
 
@@ -392,7 +394,6 @@ export default function TrajectoryDetailPage() {
     const handleBackToList = () => {
         const queryParams = new URLSearchParams();
 
-        // 保留原始查询参数 - 使用正确的参数名称
         if (searchParams.has("traj_trace_id")) queryParams.set("traj_trace_id", searchParams.get("traj_trace_id")!);
         if (searchParams.has("traj_keyword")) queryParams.set("traj_keyword", searchParams.get("traj_keyword")!);
         if (searchParams.has("trajectoryPage")) queryParams.set("trajectoryPage", searchParams.get("trajectoryPage")!);
@@ -404,84 +405,102 @@ export default function TrajectoryDetailPage() {
         router.push(`/?${queryParams.toString()}`);
     };
 
-    const darkModeClasses = "bg-[#272822] text-[#f8f8f2]";
-    const lightModeClasses = "bg-white text-gray-800";
-
     return (
-        <ConfigProvider
-            theme={{
-                token: {
-                    colorBgContainer: isDarkMode ? "#3c3d32" : "#ffffff",
-                    colorText: isDarkMode ? "#f8f8f2" : "#333",
-                },
-                components: {
-                    Card: {
-                        headerBg: isDarkMode ? "#3c3d32" : "#fafafa",
-                        colorTextHeading: isDarkMode ? "#f8f8f2" : "#333",
+        <div className={`min-h-screen ${isDarkMode ? "bg-[#272822]" : "bg-white"}`}>
+            <ConfigProvider
+                theme={{
+                    algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+                    token: {
+                        colorBgContainer: isDarkMode ? "#3c3d32" : "#ffffff",
+                        colorText: isDarkMode ? "#f8f8f2" : "#333",
+                        colorBorder: isDarkMode ? "#49483e" : "#d9d9d9",
                     },
-                    Table: {
-                        headerBg: isDarkMode ? "#3c3d32" : "#fafafa",
-                        headerColor: isDarkMode ? "#f8f8f2" : "#333",
-                    },
-                },
-            }}
-        >
-            <div
-                className={`max-w-screen-2xl mx-auto p-4 min-h-screen ${
-                    isDarkMode ? darkModeClasses : lightModeClasses
-                }`}
+                    components: {
+                        Card: {
+                            headerBg: isDarkMode ? "#3c3d32" : "#fafafa",
+                            colorTextHeading: isDarkMode ? "#f8f8f2" : "#333",
+                        },
+                        Table: {
+                            headerBg: isDarkMode ? "#3c3d32" : "#fafafa",
+                            headerColor: isDarkMode ? "#f8f8f2" : "#333",
+                        },
+                        Tabs: {
+                            itemColor: isDarkMode ? "#f8f8f2" : "#333333",
+                            itemHoverColor: isDarkMode ? "#a6e22e" : "#52c41a",
+                            itemSelectedColor: isDarkMode ? "#a6e22e" : "#52c41a",
+                            inkBarColor: isDarkMode ? "#a6e22e" : "#52c41a",
+                        },
+                        Collapse: {
+                            headerBg: isDarkMode ? "#3c3d32" : "#ffffff",
+                            contentBg: isDarkMode ? "#272822" : "#ffffff",
+                        }
+                    }
+                }}
             >
-                <div className="flex justify-between items-center mb-6">
-                    <Button
-                        type="text"
-                        icon={<ArrowLeftOutlined />}
-                        onClick={handleBackToList}
-                    >
-                        Back to List
-                    </Button>
-                    <h1 className="text-2xl font-bold">
-                        Trajectory Details (ID: {trajectory.id})
-                    </h1>
-                    <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
-                </div>
-
                 <div
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                    style={{height: "calc(100vh - 150px)"}}
+                    className={`max-w-screen-2xl mx-auto p-4 min-h-screen ${
+                        isDarkMode ? "text-[#f8f8f2]" : "text-gray-800"
+                    }`}
                 >
-                    <Card className="h-full flex flex-col">
-                        <Tabs
-                            defaultActiveKey="info"
-                            items={[
-                                {
-                                    key: "info",
-                                    label: "Trajectory Information",
-                                    children: renderTrajectoryInfo(),
-                                },
-                            ]}
-                        />
-                    </Card>
+                    <div className="flex justify-between items-center mb-6">
+                        <Button
+                            type="text"
+                            icon={<ArrowLeftOutlined />}
+                            onClick={handleBackToList}
+                        >
+                            Back to List
+                        </Button>
+                        <h1 className="text-2xl font-bold">
+                            Trajectory Details (ID: {trajectory?.id})
+                        </h1>
+                        <div className="flex items-center space-x-4">
+                            <Space size={8}>
+                                <Switch
+                                    checkedChildren={<BulbFilled />}
+                                    unCheckedChildren={<BulbOutlined />}
+                                    checked={isDarkMode}
+                                    onChange={toggleTheme}
+                                />
+                                <span>{isDarkMode ? "Dark" : "Light"}</span>
+                            </Space>
+                        </div>
+                    </div>
 
-                    <Card className="h-full flex flex-col">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-bold">Trajectory Details</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{height: "calc(100vh - 150px)"}}>
+                        <Card className="h-full flex flex-col">
                             <Tabs
-                                activeKey={viewMode}
-                                onChange={(value) => setViewMode(value as "formatted" | "json")}
+                                defaultActiveKey="info"
                                 items={[
-                                    {key: "formatted", label: "卡片视图"},
-                                    {key: "json", label: "JSON视图"},
+                                    {
+                                        key: "info",
+                                        label: "Trajectory Information",
+                                        children: renderTrajectoryInfo(),
+                                    },
                                 ]}
                             />
-                        </div>
-                        <div className="flex-grow overflow-auto">
-                            {viewMode === "formatted"
-                                ? renderFormattedTrajectory()
-                                : renderJsonTrajectory()}
-                        </div>
-                    </Card>
+                        </Card>
+
+                        <Card className="h-full flex flex-col">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-lg font-bold">Trajectory Details</h2>
+                                <Tabs
+                                    activeKey={viewMode}
+                                    onChange={(value) => setViewMode(value as "formatted" | "json")}
+                                    items={[
+                                        {key: "formatted", label: "卡片视图"},
+                                        {key: "json", label: "JSON视图"},
+                                    ]}
+                                />
+                            </div>
+                            <div className="flex-grow overflow-auto">
+                                {viewMode === "formatted"
+                                    ? renderFormattedTrajectory()
+                                    : renderJsonTrajectory()}
+                            </div>
+                        </Card>
+                    </div>
                 </div>
-            </div>
-        </ConfigProvider>
+            </ConfigProvider>
+        </div>
     );
 }
