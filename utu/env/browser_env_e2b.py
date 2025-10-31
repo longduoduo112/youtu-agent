@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 class BrowserE2BEnv(BasicEnv):
     """Browser environment extended from E2B (https://e2b.dev/docs).
     Here we used TencentCloud's agent sandbox service. https://cloud.tencent.com/product/agentsandbox
+    Sample config: configs/agents/examples/browser_e2b/browser_e2b.yaml
 
     Variables:
         sandbox: AsyncSandbox instance

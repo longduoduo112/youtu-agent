@@ -9,6 +9,7 @@ logger = get_logger(__name__)
 class E2BEnv(BasicEnv):
     """E2B Code Interpreter Environment.
     Ref: https://e2b.dev/docs
+    Sample config: configs/agents/examples/e2b/e2b_python.yaml
 
     Variables:
         sandbox: AsyncSandbox instance
