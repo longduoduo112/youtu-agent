@@ -230,7 +230,7 @@ class SimpleAgent:
 
     # wrap `Runner` apis in @openai-agents
     async def run(
-        self, input: str | list[TResponseInputItem], trace_id: str = None, save: bool = False
+        self, input: str | list[TResponseInputItem], trace_id: str = None, save: bool = False, log_to_db: bool = True
     ) -> TaskRecorder:
         """Entrypoint for running the agent
 
@@ -238,9 +238,36 @@ class SimpleAgent:
             trace_id: str to identify the run
             save: whether to update massage history (use `input_items`)
         """
-        recorder = self.run_streamed(input, trace_id)
-        async for _ in recorder.stream_events():
-            pass
+        trace_id = trace_id or AgentsUtils.gen_trace_id()
+        logger.info(f"> trace_id: {trace_id}")
+
+        if isinstance(input, list):
+            assert isinstance(input[-1], dict) and "content" in input[-1], "invalid input format!"
+            task = input[-1]["content"]
+        else:
+            assert isinstance(input, str), "input should be str or list of TResponseInputItem!"
+            task = input
+        recorder = TaskRecorder(task=task, input=input, trace_id=trace_id)
+
+        if not self._initialized:
+            await self.build(recorder.trace_id)
+        input = recorder.input
+        if isinstance(input, str):  # only add history when input is str?
+            input = self.input_items + [{"content": input, "role": "user"}]
+        run_kwargs = self._prepare_run_kwargs(input)
+        if AgentsUtils.get_current_trace():
+            run_result = await Runner.run(**run_kwargs)
+        else:
+            with trace(workflow_name="simple_agent", trace_id=recorder.trace_id):
+                run_result = await Runner.run(**run_kwargs)
+        # save final output and trajectory
+        recorder.add_run_result(run_result)
+        if save:
+            self.input_items = run_result.to_input_list()
+            # NOTE: acturally, there are only one agent in SimpleAgent
+            self.current_agent = run_result.last_agent
+        if log_to_db:
+            DBService.add(TrajectoryModel.from_task_recorder(recorder))
         return recorder
 
     def run_streamed(
@@ -285,7 +312,6 @@ class SimpleAgent:
                 self.input_items = run_streamed_result.to_input_list()
                 # NOTE: acturally, there are only one agent in SimpleAgent
                 self.current_agent = run_streamed_result.last_agent
-            # log to db
             if log_to_db:
                 DBService.add(TrajectoryModel.from_task_recorder(recorder))
         except Exception as e:
