@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.3 - 2025-10-31
+- analysis ui: add trajectories tab by @qiuchaofan
+- feat: add hooks (examples) by @Lightblues
+- examples: add ppt-gen by @fpg2012 RAG example by @Lightblues
+- train: add training-free GRPO branch by @pakchoi-i @YZ-Cai
+- train: support rl-train @Lightblues
+
 ## v0.1.2 - 2025-10-13
 - example: add ppt-gen by @fpg2012
 - analysis ui: unify env variable; fix filter by tool @chaofanqiu
