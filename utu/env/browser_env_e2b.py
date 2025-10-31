@@ -10,8 +10,15 @@ logger = logging.getLogger(__name__)
 
 
 class BrowserE2BEnv(BasicEnv):
-    """Browser environment for agents.
-    Here we used TencentCloud's agend sandbox service. https://cloud.tencent.com/product/agentsandbox"""
+    """Browser environment extended from E2B (https://e2b.dev/docs).
+    Here we used TencentCloud's agent sandbox service. https://cloud.tencent.com/product/agentsandbox
+
+    Variables:
+        sandbox: AsyncSandbox instance
+        browser_cdp_url: CDP endpoint URL for the browser
+        sandbox_novnc_url: NoVNC URL for accessing the browser GUI
+        mcp_server: MCP server instance
+    """
 
     def __init__(self, config: dict = None):
         self.config = config or {}
@@ -23,12 +30,11 @@ class BrowserE2BEnv(BasicEnv):
         # start browser sandbox
         self.sandbox: AsyncSandbox = await AsyncSandbox.create(template="browser-v1", timeout=3600)
         sandbox_url = self.sandbox.get_host(9000)
-        novnc_url = (
+        self.sandbox_novnc_url = (
             f"https://{sandbox_url}/novnc/vnc_lite.html?&path=websockify?access_token={self.sandbox._envd_access_token}"
         )
-        logger.info(f"browser sandbox created: {self.sandbox.sandbox_id}")
-        logger.info(f"vnc url: {novnc_url}")
-        cdp_url = f"https://{sandbox_url}/cdp"
+        self.browser_cdp_url = f"https://{sandbox_url}/cdp"
+        logger.info(f"browser sandbox created: {self.sandbox.sandbox_id}. vnc url: {self.sandbox_novnc_url}")
 
         # run mcp server
         config = ToolkitConfig(
@@ -40,7 +46,7 @@ class BrowserE2BEnv(BasicEnv):
                     "-y",
                     "@playwright/mcp@latest",
                     "--cdp-endpoint",
-                    cdp_url,
+                    self.browser_cdp_url,
                     "--cdp-header",
                     f"X-Access-Token: {self.sandbox._envd_access_token}",
                 ],

@@ -7,6 +7,16 @@ logger = get_logger(__name__)
 
 
 class E2BEnv(BasicEnv):
+    """E2B Code Interpreter Environment.
+    Ref: https://e2b.dev/docs
+
+    Variables:
+        sandbox: AsyncSandbox instance
+
+    Methods:
+        files_read, files_write, files_edit_diff: File operations in the sandbox
+    """
+
     def __init__(self, config: dict = None):
         config = config or {}
         self.request_timeout = config.get("request_timeout", 5)
