@@ -32,6 +32,7 @@
 
 ## 🗞️ 新闻
 
+- 📢 [2025-11-03] 新增示例：我们添加了 [**PPT 生成**](examples/ppt_gen/README.md)和 [**RAG**](configs/agents/examples/rag.yaml) 示例。
 - 🚀 [2025-10-10] [**Training-Free Group Relative Policy Optimization**](https://arxiv.org/abs/2510.08191)。DeepSeek-V3.2 的强化学习只需 8 美元？真的可以！Training-Free GRPO 让 DeepSeek-V3.2 保持冻结，仅用约 100 条样本学习 token 先验，把整次 RL 成本压到约 8 美元，并在数学与网页搜索任务上获得验证提升！代码分支 [training_free_GRPO](https://github.com/TencentCloudADP/youtu-agent/tree/training_free_GRPO) [[X 帖子](https://x.com/cai_cecilia47/status/1976558824640393559)]。
 - 🛠️ [2025-09-28] 自动智能体功能现已配套上线自动工具生成：描述所需能力，`Youtu-Agent` 即可完成工具构建。[[详情](https://tencentcloudadp.github.io/youtu-agent/auto_generation/)]。
 - 📺 [2025-09-09] 我们举办了一场直播，分享了 `Youtu-Agent` 的设计理念与基础用法。[[视频](https://www.bilibili.com/video/BV1mypqz4EvS)] [[文档](https://doc.weixin.qq.com/doc/w3_AcMATAZtAPICNLgt3CbnxRWaYWnW4)]。
@@ -76,6 +77,28 @@
         <img src="https://img.youtube.com/vi/v3QQg0WAnPs/0.jpg" alt="Paper Analysis" width="420" height="236">
       </a>
       <br><strong>论文分析</strong><br>解析给定论文，进行分析，并整理相关文献以得出最终结果。
+    </td>
+  </tr>
+  <tr >
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>RAG</strong><br>通过集成 RAGFlow 服务的 RAG 示例。
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>PPT 生成</strong><br>根据给定内容生成 PPT 文件的示例。
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/user-attachments/assets/4d74ef6f-7a84-4102-9666-0fbfe02e0d2f"
+             controls muted preload="metadata"
+             width="100%" height="300"
+             style="object-fit: cover; border-radius: 8px;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/user-attachments/assets/91568e27-bf77-44d6-baa6-b178d2d88255"
+             controls muted preload="metadata"
+             width="100%" height="300"
+             style="object-fit: cover; border-radius: 8px;"></video>
     </td>
   </tr>
 </table>
