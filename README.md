@@ -33,6 +33,7 @@ Key highlights:
 
 ## 🗞️ News
 
+- 📢 [2025-11-03] New examples: we add the [**PPT generation**](examples/ppt_gen/README.md) and [**RAG**](configs/agents/examples/rag.yaml) examples.
 - 🚀 [2025-10-10] [**Training-Free Group Relative Policy Optimization**](https://arxiv.org/abs/2510.08191). RL for DeepSeek-V3.2 at $8? Yes, it’s possible! Training-free GRPO keeps DeepSeek-V3.2 frozen, learns a token prior from ~100 samples for ~$8 RL runs, delivers verified math and web search gains! [code in branch [training_free_GRPO](https://github.com/TencentCloudADP/youtu-agent/tree/training_free_GRPO)] [[x thread](https://x.com/cai_cecilia47/status/1976558824640393559)].
 - 🛠️ [2025-09-28] Agent auto-generation now ships with companion tooling: describe a capability once and let `Youtu-Agent` build the tool for you. [[details](https://tencentcloudadp.github.io/youtu-agent/auto_generation/)].
 - 📺 [2025-09-09] We hosted a live sharing the design philosophy and basic usage of `Youtu-Agent`. [[video](https://www.bilibili.com/video/BV1mypqz4EvS)] [[documentation](https://doc.weixin.qq.com/doc/w3_AcMATAZtAPICNLgt3CbnxRWaYWnW4)].
@@ -96,6 +97,28 @@ Click on the images to view detailed videos.
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <video src="https://github.com/user-attachments/assets/09b24f94-30f0-4e88-9aaf-9f3bbf82e99d" 
              poster="https://img.youtube.com/vi/vBddCjjRk00/sddefault.jpg" 
+             controls muted preload="metadata" 
+             width="100%" height="300"
+             style="object-fit: cover; border-radius: 8px;"></video>
+    </td>
+  </tr>
+  <tr >
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>RAG</strong><br>A RAG example by integration with RAGFlow service.
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>PPT Generation</strong><br>An example that generate PPT file according to given content.
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/user-attachments/assets/4d74ef6f-7a84-4102-9666-0fbfe02e0d2f" 
+             controls muted preload="metadata" 
+             width="100%" height="300"
+             style="object-fit: cover; border-radius: 8px;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/user-attachments/assets/91568e27-bf77-44d6-baa6-b178d2d88255" 
              controls muted preload="metadata" 
              width="100%" height="300"
              style="object-fit: cover; border-radius: 8px;"></video>
