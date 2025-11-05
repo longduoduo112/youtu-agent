@@ -11,8 +11,8 @@ import json
 import logging
 from collections import OrderedDict
 from collections.abc import Iterable, Iterator, Mapping
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, assert_never
+from datetime import datetime, timezone, timedelta  # UTC
+from typing import TYPE_CHECKING, Any  # assert_never
 
 from agents import MCPListToolsSpanData
 from agents.tracing import Span, Trace, TracingProcessor
@@ -66,7 +66,12 @@ from opentelemetry.trace import (
 )
 from opentelemetry.util.types import AttributeValue
 
+UTC = timezone(timedelta(0))
 logger = logging.getLogger(__name__)
+
+
+def assert_never(arg: Any, /) -> Any:
+    raise AssertionError(f"Expected code to be unreachable, but got: {arg}")
 
 
 class OpenInferenceTracingProcessor(TracingProcessor):

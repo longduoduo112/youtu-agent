@@ -1,6 +1,7 @@
 import json
 import re
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import mcp.types as types
 from agents import Agent, FunctionTool, RunContextWrapper, Tool
@@ -10,15 +11,16 @@ from mcp import Tool as MCPTool
 
 from ..config import ToolkitConfig
 
+if TYPE_CHECKING:
+    from e2b.sandbox.commands.command_handle import CommandExitException, CommandResult
+    from e2b_code_interpreter.models import Execution
+
 
 # ------------------------------------------------------------------------------
 # e2b
 class E2BUtils:
-    from e2b.sandbox.commands.command_handle import CommandExitException, CommandResult
-    from e2b_code_interpreter.models import Execution
-
     @classmethod
-    def execution_to_str(cls, execution: Execution) -> str:
+    def execution_to_str(cls, execution: "Execution") -> str:
         """Convert e2b Execution to string.
         The official .to_json() is not good for Chinese output!"""
         from e2b_code_interpreter.models import serialize_results
@@ -35,7 +37,7 @@ class E2BUtils:
         return json.dumps(result, ensure_ascii=False)
 
     @classmethod
-    def command_result_to_str(cls, command_result: CommandResult) -> str:
+    def command_result_to_str(cls, command_result: "CommandResult") -> str:
         """Convert e2b CommandResult to string."""
         result = {
             "stdout": command_result.stdout,
@@ -46,7 +48,7 @@ class E2BUtils:
         return json.dumps(result, ensure_ascii=False)
 
     @classmethod
-    def command_exit_exception_to_str(cls, command_exception: CommandExitException) -> str:
+    def command_exit_exception_to_str(cls, command_exception: "CommandExitException") -> str:
         result = {
             "stdout": command_exception.stdout,
             "stderr": command_exception.stderr,
