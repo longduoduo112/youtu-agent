@@ -1,6 +1,10 @@
-"""
+"""Customized OpenInference OpenAI Agents tracing processor.
 https://github.com/Arize-ai/openinference/blob/main/python/instrumentation/openinference-instrumentation-openai-agents/src/openinference/instrumentation/openai_agents/_processor.py
-updated: @2025-07-31 0864c13
+    pip install openinference-instrumentation-openai-agents
+    updated: @2025-07-31 0864c13
+
+ADD:
+- trace_id for phoenix tracing
 """
 # ruff: noqa
 
