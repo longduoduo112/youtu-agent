@@ -19,7 +19,6 @@ dependencies = [
     "aiofiles>=24.1.0",
     "aiohttp>=3.12.15",
     "art>=6.5",
-    "arxiv>=2.2.0",
     "chunkr-ai>=0.1.0",
     "colorlog>=6.9.0",
     "docker>=7.1.0",
@@ -56,6 +55,9 @@ Repository = "https://github.com/TencentCloudADP/youtu-agent"
 [project.optional-dependencies]
 litllm = [
     "litellm>=1.77.0",
+]
+scholar = [
+    "arxiv>=2.3.0",
 ]
 
 [dependency-groups]

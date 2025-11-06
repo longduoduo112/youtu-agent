@@ -245,15 +245,15 @@ wheels = [
 
 [[package]]
 name = "arxiv"
-version = "2.2.0"
+version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "feedparser" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0b/16/3d72446400a59d1fbda24fed2289661398994164e07d72cfa85e43ce5e36/arxiv-2.2.0.tar.gz", hash = "sha256:6072a2211e95697092ef32acde0144d7de2cfa71208e2751724316c9df322cc0", size = 16910, upload-time = "2025-04-08T06:16:09.824Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d2/51/62bc73f67c9c9d3d3ea2cff5868ed4a9f4ecf74f07694d63fe724e51c344/arxiv-2.3.0.tar.gz", hash = "sha256:0fd8224180819cf8d0c6c3964bdca18cd33775adc8938562c788abed3bab6b1f", size = 16664, upload-time = "2025-11-01T01:48:27.25Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/1e/e7f0393e836b5347605fc356c24d9f9ae9b26e0f7e52573b80e3d28335eb/arxiv-2.2.0-py3-none-any.whl", hash = "sha256:545b8af5ab301efff7697cd112b5189e631b80521ccbc33fbc1e1f9cff63ca4d", size = 11696, upload-time = "2025-04-08T06:16:08.844Z" },
+    { url = "https://files.pythonhosted.org/packages/59/3d/7f72afb3f560ac6d7019fce32ae745a205ddeba55562d3ec8fe1497bbc76/arxiv-2.3.0-py3-none-any.whl", hash = "sha256:a5a052643b4855bb57a2674bdf1e46137060892a097691ce082b502a3128f662", size = 11557, upload-time = "2025-11-01T01:48:26.374Z" },
 ]
 
 [[package]]
@@ -5950,7 +5950,6 @@ dependencies = [
     { name = "aiofiles" },
     { name = "aiohttp" },
     { name = "art" },
-    { name = "arxiv" },
     { name = "chunkr-ai" },
     { name = "colorlog" },
     { name = "docker" },
@@ -5981,6 +5980,9 @@ dependencies = [
 [package.optional-dependencies]
 litllm = [
     { name = "litellm" },
+]
+scholar = [
+    { name = "arxiv" },
 ]
 
 [package.dev-dependencies]
@@ -6040,7 +6042,7 @@ requires-dist = [
     { name = "aiofiles", specifier = ">=24.1.0" },
     { name = "aiohttp", specifier = ">=3.12.15" },
     { name = "art", specifier = ">=6.5" },
-    { name = "arxiv", specifier = ">=2.2.0" },
+    { name = "arxiv", marker = "extra == 'scholar'", specifier = ">=2.3.0" },
     { name = "chunkr-ai", specifier = ">=0.1.0" },
     { name = "colorlog", specifier = ">=6.9.0" },
     { name = "docker", specifier = ">=7.1.0" },
@@ -6067,7 +6069,7 @@ requires-dist = [
     { name = "toml", specifier = ">=0.10.2" },
     { name = "wikipedia-api", specifier = ">=0.8.1" },
 ]
-provides-extras = ["litllm"]
+provides-extras = ["litllm", "scholar"]
 
 [package.metadata.requires-dev]
 dev = [
