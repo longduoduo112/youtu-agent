@@ -29,7 +29,6 @@ dependencies = [
     # https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai
     "openinference-instrumentation-openai>=0.1.30",
     "openinference-instrumentation-openai-agents>=1.1.1",
-    "pexpect>=4.9.0",
     "prompt-toolkit>=3.0.52",
     "psycopg2-binary>=2.9.10",
     "requests>=2.32.4",
@@ -72,6 +71,9 @@ image = [
 ]
 video = [
     "google-genai>=1.38.0",
+]
+local-bash = [
+    "pexpect>=4.9.0",
 ]
 
 [dependency-groups]

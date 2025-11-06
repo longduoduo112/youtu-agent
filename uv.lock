@@ -5958,7 +5958,6 @@ dependencies = [
     { name = "openai-agents" },
     { name = "openinference-instrumentation-openai" },
     { name = "openinference-instrumentation-openai-agents" },
-    { name = "pexpect" },
     { name = "prompt-toolkit" },
     { name = "psycopg2-binary" },
     { name = "requests" },
@@ -5980,6 +5979,9 @@ image = [
 ]
 litllm = [
     { name = "litellm" },
+]
+local-bash = [
+    { name = "pexpect" },
 ]
 local-python = [
     { name = "chardet" },
@@ -6064,7 +6066,7 @@ requires-dist = [
     { name = "openinference-instrumentation-openai", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai-agents", specifier = ">=1.1.1" },
     { name = "openpyxl", marker = "extra == 'documents'", specifier = ">=3.1.5" },
-    { name = "pexpect", specifier = ">=4.9.0" },
+    { name = "pexpect", marker = "extra == 'local-bash'", specifier = ">=4.9.0" },
     { name = "pillow", marker = "extra == 'image'", specifier = ">=11.3.0" },
     { name = "prompt-toolkit", specifier = ">=3.0.52" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
@@ -6079,7 +6081,7 @@ requires-dist = [
     { name = "toml", specifier = ">=0.10.2" },
     { name = "wikipedia-api", marker = "extra == 'wiki'", specifier = ">=0.8.1" },
 ]
-provides-extras = ["litllm", "scholar", "wiki", "local-python", "documents", "image", "video"]
+provides-extras = ["litllm", "scholar", "wiki", "local-python", "documents", "image", "video", "local-bash"]
 
 [package.metadata.requires-dev]
 dev = [
