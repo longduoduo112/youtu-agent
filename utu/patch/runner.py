@@ -7,7 +7,6 @@ import asyncio
 import logging
 from typing import cast
 
-# , ResponseReasoningItem, ResponseCustomToolCall, McpCall
 from agents import (
     Agent,
     ItemHelpers,
@@ -21,8 +20,10 @@ from agents import (
 )
 from agents._run_impl import RunImpl, get_model_tracing_impl
 from agents.exceptions import ModelBehaviorError
-from agents.items import HandoffCallItem, ModelResponse, ToolCallItem, ToolCallItemTypes
-from agents.run import _TOOL_CALL_TYPES, AgentRunner, AgentToolUseTracker, RunResultStreaming, SingleStepResult
+from agents.items import HandoffCallItem, ModelResponse, ToolCallItem, ToolCallItemTypes, ReasoningItem
+from agents.run import (
+    _TOOL_CALL_TYPES, _ServerConversationTracker, AgentRunner, AgentToolUseTracker, RunResultStreaming, SingleStepResult
+)
 from agents.stream_events import RawResponsesStreamEvent, RunItemStreamEvent
 from agents.usage import Usage
 from agents.util import _coro
@@ -31,6 +32,7 @@ from openai.types.responses import (
     ResponseFunctionToolCall,
     ResponseOutputItemDoneEvent,
     ResponseOutputMessage,
+    ResponseReasoningItem,
 )
 
 from ..config import AgentConfig
@@ -40,74 +42,6 @@ logger = logging.getLogger(__name__)
 
 
 class UTUAgentRunner(AgentRunner):
-    @classmethod
-    async def _run_single_turn(
-        cls,
-        *,
-        agent: Agent[TContext],
-        all_tools: list[Tool],
-        original_input: str | list[TResponseInputItem],
-        generated_items: list[RunItem],
-        hooks: RunHooks[TContext],
-        context_wrapper: RunContextWrapper[TContext],
-        run_config: RunConfig,
-        should_run_agent_start_hooks: bool,
-        tool_use_tracker: AgentToolUseTracker,
-        previous_response_id: str | None,
-        conversation_id: str | None,
-    ) -> SingleStepResult:
-        # Ensure we run the hooks before anything else
-        if should_run_agent_start_hooks:
-            await asyncio.gather(
-                hooks.on_agent_start(context_wrapper, agent),
-                (agent.hooks.on_start(context_wrapper, agent) if agent.hooks else _coro.noop_coroutine()),
-            )
-
-        system_prompt, prompt_config = await asyncio.gather(
-            agent.get_system_prompt(context_wrapper),
-            agent.get_prompt(context_wrapper),
-        )
-
-        output_schema = cls._get_output_schema(agent)
-        handoffs = await cls._get_handoffs(agent, context_wrapper)
-        input = ItemHelpers.input_to_new_input_list(original_input)
-        input.extend([generated_item.to_input_item() for generated_item in generated_items])
-
-        # ADD: context manager
-        input = cls._context_manager_preprocess(input, context_wrapper)
-
-        new_response = await cls._get_new_response(
-            agent,
-            system_prompt,
-            input,
-            output_schema,
-            all_tools,
-            handoffs,
-            hooks,
-            context_wrapper,
-            run_config,
-            tool_use_tracker,
-            previous_response_id,
-            conversation_id,
-            prompt_config,
-        )
-
-        # ADD: terminate when context too long
-        new_response = cls._check_too_long(new_response, context_wrapper)
-
-        return await cls._get_single_step_result_from_response(
-            agent=agent,
-            original_input=original_input,
-            pre_step_items=generated_items,
-            new_response=new_response,
-            output_schema=output_schema,
-            all_tools=all_tools,
-            handoffs=handoffs,
-            hooks=hooks,
-            context_wrapper=context_wrapper,
-            run_config=run_config,
-            tool_use_tracker=tool_use_tracker,
-        )
 
     @classmethod
     async def _run_single_turn_streamed(
@@ -120,15 +54,19 @@ class UTUAgentRunner(AgentRunner):
         should_run_agent_start_hooks: bool,
         tool_use_tracker: AgentToolUseTracker,
         all_tools: list[Tool],
-        previous_response_id: str | None,
-        conversation_id: str | None,
+        server_conversation_tracker: _ServerConversationTracker | None = None,
     ) -> SingleStepResult:
         emitted_tool_call_ids: set[str] = set()
+        emitted_reasoning_item_ids: set[str] = set()
 
         if should_run_agent_start_hooks:
             await asyncio.gather(
                 hooks.on_agent_start(context_wrapper, agent),
-                (agent.hooks.on_start(context_wrapper, agent) if agent.hooks else _coro.noop_coroutine()),
+                (
+                    agent.hooks.on_start(context_wrapper, agent)
+                    if agent.hooks
+                    else _coro.noop_coroutine()
+                ),
             )
 
         output_schema = cls._get_output_schema(agent)
@@ -148,10 +86,17 @@ class UTUAgentRunner(AgentRunner):
 
         final_response: ModelResponse | None = None
 
-        input = ItemHelpers.input_to_new_input_list(streamed_result.input)
-        input.extend([item.to_input_item() for item in streamed_result.new_items])
+        if server_conversation_tracker is not None:
+            input = server_conversation_tracker.prepare_input(
+                streamed_result.input, streamed_result.new_items
+            )
+        else:
+            input = ItemHelpers.input_to_new_input_list(streamed_result.input)
+            input.extend([item.to_input_item() for item in streamed_result.new_items])
 
         # ADD: context manager
+        if context_wrapper.context:
+            context_wrapper.context["streamed_result"] = streamed_result
         input = cls._context_manager_preprocess(input, context_wrapper)
 
         # THIS IS THE RESOLVED CONFLICT BLOCK
@@ -167,10 +112,21 @@ class UTUAgentRunner(AgentRunner):
         await asyncio.gather(
             hooks.on_llm_start(context_wrapper, agent, filtered.instructions, filtered.input),
             (
-                agent.hooks.on_llm_start(context_wrapper, agent, filtered.instructions, filtered.input)
+                agent.hooks.on_llm_start(
+                    context_wrapper, agent, filtered.instructions, filtered.input
+                )
                 if agent.hooks
                 else _coro.noop_coroutine()
             ),
+        )
+
+        previous_response_id = (
+            server_conversation_tracker.previous_response_id
+            if server_conversation_tracker
+            else None
+        )
+        conversation_id = (
+            server_conversation_tracker.conversation_id if server_conversation_tracker else None
         )
 
         # 1. Stream the output events
@@ -181,13 +137,17 @@ class UTUAgentRunner(AgentRunner):
             all_tools,
             output_schema,
             handoffs,
-            get_model_tracing_impl(run_config.tracing_disabled, run_config.trace_include_sensitive_data),
+            get_model_tracing_impl(
+                run_config.tracing_disabled, run_config.trace_include_sensitive_data
+            ),
             previous_response_id=previous_response_id,
             conversation_id=conversation_id,
             prompt=prompt_config,
         ):
+            # Emit the raw event ASAP
+            streamed_result._event_queue.put_nowait(RawResponsesStreamEvent(data=event))
+
             if isinstance(event, ResponseCompletedEvent):
-                logger.debug(f"> [DEBUG] ResponseCompletedEvent: {event}")
                 usage = (
                     Usage(
                         requests=1,
@@ -208,11 +168,12 @@ class UTUAgentRunner(AgentRunner):
                 context_wrapper.usage.add(usage)
 
             if isinstance(event, ResponseOutputItemDoneEvent):
-                logger.debug(f"> [DEBUG] ResponseOutputItemDoneEvent: {event}")
                 output_item = event.item
 
                 if isinstance(output_item, _TOOL_CALL_TYPES):
-                    call_id: str | None = getattr(output_item, "call_id", getattr(output_item, "id", None))
+                    call_id: str | None = getattr(
+                        output_item, "call_id", getattr(output_item, "id", None)
+                    )
 
                     if call_id and call_id not in emitted_tool_call_ids:
                         emitted_tool_call_ids.add(call_id)
@@ -221,9 +182,20 @@ class UTUAgentRunner(AgentRunner):
                             raw_item=cast(ToolCallItemTypes, output_item),
                             agent=agent,
                         )
-                        streamed_result._event_queue.put_nowait(RunItemStreamEvent(item=tool_item, name="tool_called"))
+                        streamed_result._event_queue.put_nowait(
+                            RunItemStreamEvent(item=tool_item, name="tool_called")
+                        )
 
-            streamed_result._event_queue.put_nowait(RawResponsesStreamEvent(data=event))
+                elif isinstance(output_item, ResponseReasoningItem):
+                    reasoning_id: str | None = getattr(output_item, "id", None)
+
+                    if reasoning_id and reasoning_id not in emitted_reasoning_item_ids:
+                        emitted_reasoning_item_ids.add(reasoning_id)
+
+                        reasoning_item = ReasoningItem(raw_item=output_item, agent=agent)
+                        streamed_result._event_queue.put_nowait(
+                            RunItemStreamEvent(item=reasoning_item, name="reasoning_item_created")
+                        )
 
         # Call hook just after the model response is finalized.
         if final_response is not None:
@@ -271,18 +243,111 @@ class UTUAgentRunner(AgentRunner):
                 for item in items_to_filter
                 if not (
                     isinstance(item, ToolCallItem)
-                    and (call_id := getattr(item.raw_item, "call_id", getattr(item.raw_item, "id", None)))
+                    and (
+                        call_id := getattr(
+                            item.raw_item, "call_id", getattr(item.raw_item, "id", None)
+                        )
+                    )
                     and call_id in emitted_tool_call_ids
                 )
             ]
 
+        if emitted_reasoning_item_ids:
+            # Filter out reasoning items that were already emitted during streaming
+            items_to_filter = [
+                item
+                for item in items_to_filter
+                if not (
+                    isinstance(item, ReasoningItem)
+                    and (reasoning_id := getattr(item.raw_item, "id", None))
+                    and reasoning_id in emitted_reasoning_item_ids
+                )
+            ]
+
         # Filter out HandoffCallItem to avoid duplicates (already sent earlier)
-        items_to_filter = [item for item in items_to_filter if not isinstance(item, HandoffCallItem)]
+        items_to_filter = [
+            item for item in items_to_filter if not isinstance(item, HandoffCallItem)
+        ]
 
         # Create filtered result and send to queue
         filtered_result = _dc.replace(single_step_result, new_step_items=items_to_filter)
         RunImpl.stream_step_result_to_queue(filtered_result, streamed_result._event_queue)
         return single_step_result
+
+    @classmethod
+    async def _run_single_turn(
+        cls,
+        *,
+        agent: Agent[TContext],
+        all_tools: list[Tool],
+        original_input: str | list[TResponseInputItem],
+        generated_items: list[RunItem],
+        hooks: RunHooks[TContext],
+        context_wrapper: RunContextWrapper[TContext],
+        run_config: RunConfig,
+        should_run_agent_start_hooks: bool,
+        tool_use_tracker: AgentToolUseTracker,
+        server_conversation_tracker: _ServerConversationTracker | None = None,
+    ) -> SingleStepResult:
+        # Ensure we run the hooks before anything else
+        if should_run_agent_start_hooks:
+            await asyncio.gather(
+                hooks.on_agent_start(context_wrapper, agent),
+                (
+                    agent.hooks.on_start(context_wrapper, agent)
+                    if agent.hooks
+                    else _coro.noop_coroutine()
+                ),
+            )
+
+        system_prompt, prompt_config = await asyncio.gather(
+            agent.get_system_prompt(context_wrapper),
+            agent.get_prompt(context_wrapper),
+        )
+
+        output_schema = cls._get_output_schema(agent)
+        handoffs = await cls._get_handoffs(agent, context_wrapper)
+        if server_conversation_tracker is not None:
+            input = server_conversation_tracker.prepare_input(original_input, generated_items)
+        else:
+            input = ItemHelpers.input_to_new_input_list(original_input)
+            input.extend([generated_item.to_input_item() for generated_item in generated_items])
+
+        # ADD: context manager
+        input = cls._context_manager_preprocess(input, context_wrapper)
+
+        new_response = await cls._get_new_response(
+            agent,
+            system_prompt,
+            input,
+            output_schema,
+            all_tools,
+            handoffs,
+            hooks,
+            context_wrapper,
+            run_config,
+            tool_use_tracker,
+            server_conversation_tracker,
+            prompt_config,
+        )
+
+        # ADD: terminate when context too long
+        new_response = cls._check_too_long(new_response, context_wrapper)
+
+        return await cls._get_single_step_result_from_response(
+            agent=agent,
+            original_input=original_input,
+            pre_step_items=generated_items,
+            new_response=new_response,
+            output_schema=output_schema,
+            all_tools=all_tools,
+            handoffs=handoffs,
+            hooks=hooks,
+            context_wrapper=context_wrapper,
+            run_config=run_config,
+            tool_use_tracker=tool_use_tracker,
+        )
+
 
     @classmethod
     def _context_manager_preprocess(
