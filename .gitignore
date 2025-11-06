@@ -72,3 +72,5 @@ test.yaml
 pgs
 CLAUDE.md
 .specify
+alembic.ini
+alembic/

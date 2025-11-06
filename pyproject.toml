@@ -30,7 +30,7 @@ dependencies = [
     "matplotlib>=3.10.3",
     "mcp>=1.12.3",
     # https://github.com/openai/openai-agents-python/issues/1395 | openai==1.97.1 & openai-agents==0.2.5
-    "openai-agents==0.3.3",
+    "openai-agents==0.5.0",
     # https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai
     "openinference-instrumentation-openai>=0.1.30",
     "openinference-instrumentation-openai-agents>=1.1.1",
@@ -64,7 +64,6 @@ dev = [
     "arize-phoenix-otel>=0.11.0",
     # datasets == 4.0.0 remove scripts, https://github.com/huggingface/datasets/issues/7693
     "datasets==3.6.0",
-    "gradio>=5.42.0",
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.16",
     "mkdocstrings[python]>=0.30.0",
@@ -150,6 +149,7 @@ exclude = [
     "**/*.pyi",
     ".*",
     "configs/",
+    "utu/patch/runner.py"
 ]
 
 [tool.ruff.lint]
