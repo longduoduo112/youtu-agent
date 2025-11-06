@@ -7,7 +7,10 @@ import math
 import os
 import pathlib
 
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:
+    pass
 
 from ..config import ToolkitConfig
 from ..utils import SimplifiedAsyncOpenAI, get_logger
