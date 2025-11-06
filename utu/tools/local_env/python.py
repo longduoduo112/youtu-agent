@@ -12,10 +12,15 @@ import re
 import traceback
 from typing import TYPE_CHECKING
 
-import matplotlib
-import matplotlib.pyplot as plt
-from IPython.core.interactiveshell import InteractiveShell
-from traitlets.config.loader import Config
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
+    from IPython.core.interactiveshell import InteractiveShell
+    from traitlets.config.loader import Config
+
+    matplotlib.use("Agg")
+except ImportError:
+    pass
 
 if TYPE_CHECKING:
     from IPython.core.history import HistoryManager
@@ -24,8 +29,6 @@ if TYPE_CHECKING:
     class Config(BaseConfig):
         HistoryManager: HistoryManager
 
-
-matplotlib.use("Agg")
 
 # Used to clean ANSI escape sequences
 ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")

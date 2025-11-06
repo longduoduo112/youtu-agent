@@ -6,7 +6,10 @@ https://github.com/pexpect/pexpect
 import re
 import sys
 
-import pexpect
+try:
+    import pexpect
+except ImportError:
+    pass
 
 
 class PexpectBash:

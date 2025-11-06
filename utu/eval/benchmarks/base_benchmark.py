@@ -102,6 +102,8 @@ class BaseBenchmark:
         start_time = time.time()
         result = await agent.run(sample.augmented_question, trace_id=trace_id)
         end_time = time.time()
+        if hasattr(agent, "cleanup"):
+            await agent.cleanup()
 
         # Update the sample with the predicted answer and trajectory
         sample.update(
