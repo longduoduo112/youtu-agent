@@ -5974,7 +5974,6 @@ dependencies = [
     { name = "sqlmodel" },
     { name = "tiktoken" },
     { name = "toml" },
-    { name = "wikipedia-api" },
 ]
 
 [package.optional-dependencies]
@@ -5983,6 +5982,9 @@ litllm = [
 ]
 scholar = [
     { name = "arxiv" },
+]
+wiki = [
+    { name = "wikipedia-api" },
 ]
 
 [package.dev-dependencies]
@@ -6067,9 +6069,9 @@ requires-dist = [
     { name = "sqlmodel", specifier = ">=0.0.24" },
     { name = "tiktoken", specifier = ">=0.9.0" },
     { name = "toml", specifier = ">=0.10.2" },
-    { name = "wikipedia-api", specifier = ">=0.8.1" },
+    { name = "wikipedia-api", marker = "extra == 'wiki'", specifier = ">=0.8.1" },
 ]
-provides-extras = ["litllm", "scholar"]
+provides-extras = ["litllm", "scholar", "wiki"]
 
 [package.metadata.requires-dev]
 dev = [
