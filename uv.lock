@@ -5950,7 +5950,6 @@ dependencies = [
     { name = "aiofiles" },
     { name = "aiohttp" },
     { name = "art" },
-    { name = "chunkr-ai" },
     { name = "colorlog" },
     { name = "docker" },
     { name = "google-genai" },
@@ -5960,11 +5959,9 @@ dependencies = [
     { name = "openai-agents" },
     { name = "openinference-instrumentation-openai" },
     { name = "openinference-instrumentation-openai-agents" },
-    { name = "openpyxl" },
     { name = "pexpect" },
     { name = "prompt-toolkit" },
     { name = "psycopg2-binary" },
-    { name = "python-pptx" },
     { name = "requests" },
     { name = "rich" },
     { name = "sqlmodel" },
@@ -5973,6 +5970,15 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+documents = [
+    { name = "chunkr-ai" },
+    { name = "openpyxl" },
+    { name = "pymupdf" },
+    { name = "python-pptx" },
+]
+image = [
+    { name = "pillow" },
+]
 litllm = [
     { name = "litellm" },
 ]
@@ -6008,9 +6014,6 @@ dev = [
     { name = "tornado" },
     { name = "twine" },
 ]
-documents = [
-    { name = "pymupdf" },
-]
 env = [
     { name = "e2b" },
     { name = "e2b-code-interpreter" },
@@ -6045,7 +6048,7 @@ requires-dist = [
     { name = "art", specifier = ">=6.5" },
     { name = "arxiv", marker = "extra == 'scholar'", specifier = ">=2.3.0" },
     { name = "chardet", marker = "extra == 'local-python'", specifier = ">=5.2.0" },
-    { name = "chunkr-ai", specifier = ">=0.1.0" },
+    { name = "chunkr-ai", marker = "extra == 'documents'", specifier = ">=0.3.7" },
     { name = "colorlog", specifier = ">=6.9.0" },
     { name = "docker", specifier = ">=7.1.0" },
     { name = "google-genai", specifier = ">=1.26.0" },
@@ -6058,11 +6061,13 @@ requires-dist = [
     { name = "openai-agents", specifier = "==0.5.0" },
     { name = "openinference-instrumentation-openai", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai-agents", specifier = ">=1.1.1" },
-    { name = "openpyxl", specifier = ">=3.1.5" },
+    { name = "openpyxl", marker = "extra == 'documents'", specifier = ">=3.1.5" },
     { name = "pexpect", specifier = ">=4.9.0" },
+    { name = "pillow", marker = "extra == 'image'", specifier = ">=11.3.0" },
     { name = "prompt-toolkit", specifier = ">=3.0.52" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
-    { name = "python-pptx", specifier = ">=1.0.2" },
+    { name = "pymupdf", marker = "extra == 'documents'", specifier = ">=1.26.4" },
+    { name = "python-pptx", marker = "extra == 'documents'", specifier = ">=1.0.2" },
     { name = "requests", specifier = ">=2.32.4" },
     { name = "rich", specifier = ">=14.1.0" },
     { name = "scipy", marker = "extra == 'local-python'", specifier = ">=1.15.3" },
@@ -6072,7 +6077,7 @@ requires-dist = [
     { name = "toml", specifier = ">=0.10.2" },
     { name = "wikipedia-api", marker = "extra == 'wiki'", specifier = ">=0.8.1" },
 ]
-provides-extras = ["litllm", "scholar", "wiki", "local-python"]
+provides-extras = ["litllm", "scholar", "wiki", "local-python", "documents", "image"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -6090,7 +6095,6 @@ dev = [
     { name = "tornado", specifier = ">=6.5.2" },
     { name = "twine", specifier = ">=6.2.0" },
 ]
-documents = [{ name = "pymupdf", specifier = ">=1.26.3" }]
 env = [
     { name = "e2b", specifier = ">=2.5.0" },
     { name = "e2b-code-interpreter", specifier = ">=2.2.1" },
