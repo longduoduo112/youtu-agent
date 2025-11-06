@@ -16,7 +16,6 @@ classifiers = [
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "aiofiles>=24.1.0",
     "aiohttp>=3.12.15",
     "art>=6.5",
     "colorlog>=6.9.0",
@@ -44,11 +43,18 @@ Repository = "https://github.com/TencentCloudADP/youtu-agent"
 litllm = [
     "litellm>=1.77.0",
 ]
+search = [
+    "crawl4ai>=0.7.4",
+]
 scholar = [
     "arxiv>=2.3.0",
 ]
 wiki = [
     "wikipedia-api>=0.8.1",
+]
+e2b = [
+    "e2b>=2.5.0",
+    "e2b-code-interpreter>=2.2.1",
 ]
 local-python = [
     "chardet>=5.2.0",
@@ -95,10 +101,6 @@ dev = [
     "tornado>=6.5.2",
     "twine>=6.2.0",
 ]
-env = [
-    "e2b>=2.5.0",
-    "e2b-code-interpreter>=2.2.1",
-]
 gaia = [
     "astor>=0.8.1",
     "docx2markdown>=0.1.1",
@@ -117,9 +119,6 @@ gaia = [
 rl = [
     "aiolimiter>=1.2.1",
     "tencentcloud-sdk-python>=3.0.1474",
-]
-search = [
-    "crawl4ai>=0.7.4",
 ]
 
 
