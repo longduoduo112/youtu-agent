@@ -2,6 +2,7 @@ import asyncio
 import json
 import time
 
+from agents import gen_trace_id, trace
 from tqdm import tqdm
 
 from ...agents import get_agent
@@ -39,14 +40,17 @@ class BaseBenchmark:
             raise ValueError(f"No samples found for data config '{self.config.data}'! Please check the data config.")
 
     async def main(self):
-        logger.info(f"> Running with config: \n{json.dumps(self.config.model_dump(), indent=2, ensure_ascii=False)}")
-        self.preprocess()
-        await self.rollout()
-        await self.judge()
-        logger.info("> Running stat...")
-        await self.stat()
-        logger.info("> Cleaning up...")
-        await self.cleanup()
+        with trace(f"[{self.config.exp_id}] Evaluation", trace_id=gen_trace_id()):
+            logger.info(
+                f"> Running with config: \n{json.dumps(self.config.model_dump(), indent=2, ensure_ascii=False)}"
+            )
+            self.preprocess()
+            await self.rollout()
+            await self.judge()
+            logger.info("> Running stat...")
+            await self.stat()
+            logger.info("> Cleaning up...")
+            await self.cleanup()
 
     def preprocess(self) -> None:
         """Preprocess the dataset before rollout."""
@@ -102,8 +106,6 @@ class BaseBenchmark:
         start_time = time.time()
         result = await agent.run(sample.augmented_question, trace_id=trace_id)
         end_time = time.time()
-        if hasattr(agent, "cleanup"):
-            await agent.cleanup()
 
         # Update the sample with the predicted answer and trajectory
         sample.update(
