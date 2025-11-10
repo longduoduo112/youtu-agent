@@ -1,21 +1,37 @@
 # PowerPoint Template Example
 
+## Prerequisites
+
+This example requires additional dependencies for image processing, document handling, and visualization.
+
+**Install dependencies:**
+
+```bash
+# Navigate to project root
+cd youtu-agent
+
+# Install PPT generation dependencies
+uv sync --extra ppt-gen
+```
+
 ## Quick Start
 
-Download [template files](https://drive.google.com/drive/folders/1oZYoHBJJwzAzhrpvnUnklvU7LcS4oFz6?usp=sharing) to `examples/ppt_gen/template` directory.
+Download [template files](https://cdn.jsdelivr.net/gh/TencentCloudADP-DevRel/picgo-images@main/assets/templates.zip) to `examples/ppt_gen/templates` directory.
 
-Prepare the reference resource (plain text / markdown / html webpage) for PPT generation. For example, download the [Nobel Prize webpage](https://www.nobelprize.org/prizes/physics/2025/popular-information/).
+Navigate to the example directory, prepare the reference resource (plain text / markdown / html webpage) for PPT generation. For example, download the [Nobel Prize webpage](https://www.nobelprize.org/prizes/physics/2025/popular-information/).
 
-```
+```bash
+# Navigate to the example directory
+cd examples/ppt_gen
+
+# Download sample webpage
 wget https://www.nobelprize.org/prizes/physics/2025/popular-information/ -O webpage.html
 ```
 
-`cd` into `examples/ppt_gen`
+Run the PPT generation script.
 
-Run `main.py`
-
-```
-python main.py --file webpage.html --template_path template/0.pptx --pages 15
+```python
+python main.py --file webpage.html --template_path templates/0.pptx --pages 15
 ```
 
 The script will produce a `json` file and a `pptx` file if everything is OK.
