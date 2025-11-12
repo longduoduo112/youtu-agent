@@ -34,11 +34,17 @@ The system uses a hierarchical configuration approach:
 
 Here are step-by-step instructions to run the training-free GRPO process for agent practice and evaluation.
 Please follow each step carefully to ensure proper setup and execution.
-For built-in example workflows (covering Step 1 to 6) on math reasoning and web searching, please refer to the [📝 Example Workflows](#-example-workflows).
+For built-in example workflows on math reasoning and web searching, please refer to the [📝 Example Workflows](#-example-workflows).
 
 ### Step 0. Environment Setup
 
-Please refer to the [QuickStart](https://tencentcloudadp.github.io/youtu-agent/quickstart/) documentation for environment setup and installation of Youtu-Agent framework. If you are new to Python, please refer to [Begginer's QuickStart Guide](https://tencentcloudadp.github.io/youtu-agent/quickstart_beginner/) for detailed instructions.
+Please refer to the [QuickStart](https://tencentcloudadp.github.io/youtu-agent/quickstart/) documentation for environment setup and installation of Youtu-Agent framework. If you are new to Python, please refer to [Begginer's QuickStart Guide](https://tencentcloudadp.github.io/youtu-agent/quickstart_beginner/) for detailed instructions. 
+
+Please install all dependencies by:
+```bash
+uv sync --all-extras
+source .venv/bin/activate
+```
 
 For tracing and monitoring the practice and evaluation process, you can enable Phoenix tracing by following the [Tracing & Monitoring Documentation](https://tencentcloudadp.github.io/youtu-agent/environment_variables/#tracing-monitoring). For simplicity, you can start a local Phoenix server by running:
 
@@ -261,6 +267,7 @@ practice:
     output: A step-by-step reasoning process that leads to the final answer
   learning_objective: |                         # Briefly describe the learning goal and expected experiences for the practice process. Here is an example for a math reasoning agent:
     Help the agent to improve the solving capability on math questions by extracting general and concise guidelines.
+  num_experiences_per_query: 1                  # Number of experiences to extract per query
 
 # Data Arguments  
 data:
@@ -369,6 +376,12 @@ python scripts/run_eval.py \
 
 ### Math Reasoning
 
+**Step 0. Environment Setup**:
+Besides the common environment setup in [Step 0](#step-0-environment-setup), please install the `math-verify` package for math verification:
+```bash
+uv pip install math-verify
+```
+
 **Step 1. Data Preparation**:
 Use built-in datasets.
 ```bash
@@ -379,7 +392,7 @@ python scripts/data/process_training_free_GRPO_data.py
 The built-in math verification function is already provided in `utu/practice/verify/math.py`.
 
 **Step 3. Prepare Configurations**:
-Use the built-in math agent, evaluation and practice configurations, i.e., `configs/agents/practice/math_agent.yaml`, `configs/eval/math/*.yaml` and `configs/practice/math_reasoning.yaml`, respectively.
+For `deepseek-chat` LLM from DeepSeek official API, you can use the built-in math agent, evaluation and practice configurations, i.e., `configs/agents/practice/math_agent.yaml`, `configs/eval/math/*.yaml` and `configs/practice/math_reasoning.yaml`, respectively. Note that for different LLMs, the optimal configurations may vary. You can try to modify these configuration accordingly.
 
 **Step 4. Evaluating Baseline**:
 Use the built-in math evaluation configuration.
@@ -404,6 +417,13 @@ python scripts/run_eval.py --config_name math/math_practice_AIME25
 
 ### Web Searching
 
+**Step 0. Environment Setup**:
+Besides the common environment setup in in [Step 0](#step-0-environment-setup), please set up additional environment variables in `.env` for web search APIs (e.g., Serper, Jina).
+```bash
+SERPER_API_KEY=replace-with-your-serper-api-key
+JINA_API_KEY=replace-with-your-jina-api-key
+```
+
 **Step 1. Data Preparation**:
 Use built-in datasets.
 ```bash
@@ -414,7 +434,7 @@ python scripts/data/process_training_free_GRPO_data.py
 The built-in web search verification function is already provided in `utu/practice/verify/webwalker.py`.
 
 **Step 3. Prepare Configurations**:
-Use the built-in web search agent, evaluation and practice configurations, i.e., `configs/agents/practice/web_agent.yaml`, `configs/eval/web/web.yaml` and `configs/practice/web_search.yaml`, respectively.
+To run with DeepSeek-V3.2-Exp, you can use the built-in web search agent, evaluation and practice configurations, i.e., `configs/agents/practice/web_agent.yaml`, `configs/eval/web/web.yaml` and `configs/practice/web_search.yaml`, respectively. Note that for different LLMs, the optimal configurations may vary. You can try to modify these configuration accordingly.
 
 **Step 4. Evaluating Baseline**:
 Use the built-in web evaluation configuration.

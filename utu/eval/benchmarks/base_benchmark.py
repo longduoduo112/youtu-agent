@@ -72,7 +72,7 @@ class BaseBenchmark:
         self.dataset.save(sample)
         return sample
 
-    async def rollout(self) -> None:
+    async def rollout(self, max_retries: int = 3) -> None:
         """Rollout the datapoints."""
         samples = self.dataset.get_samples(stage="init")
         logger.info(f"Rollout {len(samples)} samples...")
@@ -81,13 +81,16 @@ class BaseBenchmark:
 
         async def rollout_with_semaphore(item: EvaluationSample):
             async with semaphore:
-                try:
-                    return await self.rollout_one(item)
-                except Exception as e:  # pylint: disable=broad-except
-                    logger.error(
-                        f">>>>>>>>>>>>>\nError running rollout on sample '{item.raw_question}': {e}\n<<<<<<<<<<<<<",
-                        exc_info=True,
-                    )
+                for i in range(max_retries):
+                    if i > 0:
+                        logger.warning(f"Retrying rollout for sample '{item.raw_question}', attempt {i + 1}")
+                    try:
+                        return await self.rollout_one(item)
+                    except Exception as e:  # pylint: disable=broad-except
+                        logger.error(
+                            f">>>>>>>>>>>>>\nError running rollout on sample '{item.raw_question}': {e}\n<<<<<<<<<<<<<",
+                            exc_info=True,
+                        )
 
         tasks = [rollout_with_semaphore(item) for item in samples]
         results = []
@@ -124,6 +127,12 @@ class BaseBenchmark:
         Args:
             stage (str|None, optional): The stage of samples to judge. If set to None, you can rejudge all samples.
         """
+        if stage == "rollout":
+            num_init_samples = len(self.dataset.get_samples(stage="init"))
+            if num_init_samples > 0:
+                logger.error(f"There are {num_init_samples} samples might failed unexpectedly in rollout stage."
+                               "Please rerun the benchmarking to continue for final results.")
+                exit(1)
         samples = self.dataset.get_samples(stage=stage)
         logger.info(f"Judging {len(samples)} samples...")
 

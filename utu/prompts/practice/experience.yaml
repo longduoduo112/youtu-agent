@@ -145,7 +145,7 @@ SINGLE_QUERY_GROUP_ADVANTAGE_SP: |
   </Pattern Identification>
 
   <Experiences>
-    [Extract {{ num_experiences }} experiences that could guide future performance of the working agent, focusing on the learning objective]
+    [Extract AT MOST **{{ num_experiences }}** experiences that could guide future performance of the working agent, focusing on the learning objective]
     1. [experience 1]
     2. [experience 2]
     ...

@@ -80,6 +80,7 @@ class TrainingFreeGRPO:
         # 2. Create practice rollout manager
         practice_eval_config = self.config.evaluation.model_copy()
         practice_eval_config.pass_k = self.config.practice.grpo_n
+        self.original_temperature = practice_eval_config.agent.model.model_settings.temperature
         practice_eval_config.agent.model.model_settings.temperature = self.config.practice.rollout_temperature
         practice_eval_config.data = DataConfig(dataset=self.config.data.practice_dataset_name)
         self.practice_rollout_manager = RolloutManager(
@@ -239,11 +240,12 @@ class TrainingFreeGRPO:
         # Format experiences for insertion
         if experiences:
             experience_text = "\n\nWhen solving problems, you MUST first carefully read and understand "
-            "the helpful instructions and experiences:\n"
+            experience_text += "the helpful instructions and experiences:\n"
             experience_text += "\n".join([f"[{i}]. {e}" for i, e in experiences.items()])
             # Insert experiences at the end of instructions
             current_instructions = config_dict.get("agent", {}).get("instructions", "You are a helpful assistant.")
             config_dict["agent"]["instructions"] = current_instructions + experience_text
+            config_dict["model"]["model_settings"]["temperature"] = self.original_temperature
 
         # Remove unnecessary fields
         remain_default_keys = ["type", "model", "agent", "toolkits"]
@@ -256,7 +258,7 @@ class TrainingFreeGRPO:
         config_header = "# @package _global_\ndefaults:\n  - _self_\n\n"
         # save to file
         config_filename = f"{self.config.evaluation.exp_id}_agent.yaml"
-        config_dir = str(DIR_ROOT / "configs" / "agents" / "simple")
+        config_dir = str(DIR_ROOT / "configs" / "agents" / "practice")
         full_path = os.path.join(config_dir, os.path.basename(config_filename))
         with open(full_path, "w", encoding="utf-8") as f:
             f.write(config_header + yaml_config)
