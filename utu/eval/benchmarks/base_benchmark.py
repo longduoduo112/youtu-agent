@@ -130,8 +130,10 @@ class BaseBenchmark:
         if stage == "rollout":
             num_init_samples = len(self.dataset.get_samples(stage="init"))
             if num_init_samples > 0:
-                logger.error(f"There are {num_init_samples} samples might failed unexpectedly in rollout stage."
-                               "Please rerun the benchmarking to continue for final results.")
+                logger.error(
+                    f"There are {num_init_samples} samples might failed unexpectedly in rollout stage."
+                    "Please rerun the benchmarking to continue for final results."
+                )
                 exit(1)
         samples = self.dataset.get_samples(stage=stage)
         logger.info(f"Judging {len(samples)} samples...")
