@@ -1,11 +1,11 @@
 import json
 import logging
+from typing import Any
 
-# from ppt_template_model import TYPE_MAP, parse_json, 
+import yaml
 from ppt_template_model import PageConfig
 from pptx import Presentation
 from utils import delete_slide, delete_slide_range, duplicate_slide, move_slide
-
 
 # def fill_template(template_path, output_path, json_data):
 #     """
@@ -30,8 +30,9 @@ from utils import delete_slide, delete_slide_range, duplicate_slide, move_slide
 #     move_slide(prs, 1, len(prs.slides) - 1)
 #     prs.save(output_path)
 
-def fill_template_with_yaml_config(template_path, output_path, json_data, yaml_config_path):
-    page_config = PageConfig(yaml_config_path)
+
+def fill_template_with_yaml_config(template_path, output_path, json_data, yaml_config: dict[str, Any]):
+    page_config = PageConfig(yaml_config)
     prs = Presentation(template_path)
     data = json.loads(json_data)
     slides_data = data.get("slides", [])
@@ -62,6 +63,7 @@ def fill_template_with_yaml_config(template_path, output_path, json_data, yaml_c
     delete_slide(prs, 0)
     move_slide(prs, 1, len(prs.slides) - 1)
     prs.save(output_path)
+
 
 def extract_json(content):
     """
@@ -97,4 +99,8 @@ if __name__ == "__main__":
     with open(input_json) as f:
         content = f.read()
     json_data = extract_json(content)
-    fill_template_with_yaml_config(template, output, json_data, args.yaml_config)
+
+    with open(args.yaml_config) as f:
+        yaml_config = yaml.safe_load(f)
+
+    fill_template_with_yaml_config(template, output, json_data, yaml_config)

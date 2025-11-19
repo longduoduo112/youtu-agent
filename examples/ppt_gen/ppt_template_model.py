@@ -2,7 +2,6 @@
 This module is used to define the PPT template pydantic models.
 """
 
-import json
 import logging
 import traceback
 import uuid
@@ -10,10 +9,9 @@ from typing import Any, Literal
 
 import requests
 from PIL import Image
-from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 from pydantic import BaseModel
-from utils import delete_shape, duplicate_slide, find_shape_with_name_except, replace_picture_keep_format
+from utils import delete_shape, find_shape_with_name_except, replace_picture_keep_format
 
 # TYPE_MAP = {
 #     "content": 0,
@@ -51,8 +49,10 @@ class TextContent(BaseContent):
     content_type: Literal["text"] = "text"
     paragraph: list[Paragraph] | str
 
+
 class BasicImage(BaseModel):
     image_url: str  # absolute url
+
 
 class ImageContent(BaseContent):
     content_type: Literal["image"] = "image"
@@ -399,88 +399,86 @@ class TableContent(BaseContent):
 #         logging.info(f"ppt_type: {self.ppt_type}")
 #         handle_pure_text(self.ppt_type, ppt_type_shape, slide)
 
+
 class PageConfig:
     """Configuration loader for page templates from YAML"""
-    
-    def __init__(self, yaml_file_path: str = "yaml_example.yaml"):
+
+    def __init__(self, config: dict[str, Any]):
         self.type_map = {}
         self.pages = {}
-        self._load_config(yaml_file_path)
-    
-    def _load_config(self, yaml_file_path: str):
-        """Load configuration from YAML file"""
-        import yaml
-        with open(yaml_file_path, 'r', encoding='utf-8') as f:
-            config = yaml.safe_load(f)
-        
+        self._load_config(config)
+
+    def _load_config(self, config: dict[str, Any]):
+        """Load configuration from YAML config"""
+
         # Load type_map
-        if 'type_map' in config:
-            for item in config['type_map']:
+        if "type_map" in config:
+            for item in config["type_map"]:
                 if isinstance(item, dict):
                     for key, value in item.items():
                         self.type_map[key] = value
         else:
             raise ValueError("type_map not found in YAML config")
-        
+
         # Load page configurations (allow both '<type>_page' and '<type>')
         for key, value in config.items():
-            if key == 'type_map':
+            if key == "type_map":
                 continue
 
-            page_key = key if key.endswith('_page') else f"{key}_page"
+            page_key = key if key.endswith("_page") else f"{key}_page"
             self.pages[page_key] = value
-            
+
     def render(self, slide, page_json: dict[str, Any]):
         """Render slide based on page configuration and data"""
-        page_type = page_json.get('type', '')
+        page_type = page_json.get("type", "")
         logging.info(f"===Rendering page type: {page_type}===")
-        
+
         # Get page configuration
         page_config = self.pages.get(f"{page_type}_page", {})
-        
+
         # Render all fields based on their type from YAML config
         for field_name, field_config in page_config.items():
-            if field_name == 'type' or field_name == 'description':
+            if field_name == "type" or field_name == "description":
                 continue
-                
+
             field_value = page_json.get(field_name)
             if field_value is None:
                 continue
-                
-            field_type = field_config.get('type', 'str')
-            
-            if field_type == 'str':
+
+            field_type = field_config.get("type", "str")
+
+            if field_type == "str":
                 self._render_text_field(slide, field_name, field_value)
-            elif field_type == 'int':
+            elif field_type == "int":
                 int_str = str(field_value)
                 self._render_text_field(slide, field_name, int_str)
-            elif field_type == 'content':
+            elif field_type == "content":
                 self._render_content_field(slide, field_name, field_value)
-            elif field_type == 'content_list':
+            elif field_type == "content_list":
                 self._render_content_list_field(slide, field_name, field_value)
-            elif field_type == 'item_list':
+            elif field_type == "item_list":
                 self._render_item_list_field(slide, field_name, field_value)
-            elif field_type == 'str_list':
+            elif field_type == "str_list":
                 self._render_label_list_field(slide, field_name, field_value)
-            elif field_type == 'image':
+            elif field_type == "image":
                 self._render_basic_image_field(slide, field_name, field_value)
             else:
                 logging.warning(f"Unknown field type: {field_type}")
-    
+
     def _render_basic_image_field(self, slide, field_name: str, image_value):
         logging.info(f"{field_name}: {image_value}")
         shape = find_shape_with_name_except(slide.shapes, field_name)
         image = self._ensure_basic_image_model(image_value)
         if shape:
             handle_image(image.image_url, shape, slide)
-    
+
     def _render_text_field(self, slide, field_name: str, text_value: str):
         """Render text field"""
         logging.info(f"{field_name}: {text_value}")
         shape = find_shape_with_name_except(slide.shapes, field_name)
         if shape:
             handle_pure_text(text_value, shape, slide)
-    
+
     def _render_content_field(self, slide, field_name: str, content_value):
         """Render content field"""
         logging.info(f"{field_name}: {content_value}")
@@ -492,26 +490,26 @@ class PageConfig:
     def _render_content_list_field(self, slide, field_name: str, content_values: list):
         """Render list of content fields into <field_name>1, <field_name>2, ..."""
         for i, content_value in enumerate(content_values):
-            target_name = f"{field_name}{i+1}"
+            target_name = f"{field_name}{i + 1}"
             logging.info(f"{target_name}: {content_value}")
             shape = find_shape_with_name_except(slide.shapes, target_name)
             if shape:
                 handle_content(self._ensure_content_model(content_value), shape, slide)
             else:
                 logging.warning(f"Shape not found for {target_name}")
-    
+
     def _render_item_list_field(self, slide, field_name: str, items: list):
         """Render item list field"""
         for ind, item in enumerate(items):
             logging.info(f"{field_name} {ind}: {item}")
             handle_item(self._ensure_item_model(item), ind, slide)
-    
+
     def _render_label_list_field(self, slide, field_name: str, labels: list):
         """Render label list field"""
         for i, label_text in enumerate(labels):
-            label_shape = find_shape_with_name_except(slide.shapes, f"label{i+1}")
+            label_shape = find_shape_with_name_except(slide.shapes, f"label{i + 1}")
             if label_shape:
-                logging.info(f"label{i+1}: {label_text}")
+                logging.info(f"label{i + 1}: {label_text}")
                 handle_pure_text(label_text, label_shape, slide)
 
     def _ensure_basic_image_model(self, image_value: Any) -> BasicImage:
@@ -550,6 +548,7 @@ class PageConfig:
             raise TypeError("Item field must be dict or Item instance")
 
         return Item(**item_value)
+
 
 # def parse_json(json_data: dict[str, Any]) -> list[Slide]:
 #     slides = []
@@ -640,6 +639,7 @@ def download_image(url, base_dir="."):
 #     except Exception as e:
 #         logging.error(f"Failed to set text: {text} {e}")
 #         traceback.print_exc()
+
 
 def handle_pure_text(text: str, target_shape, slide):
     try:
@@ -771,26 +771,3 @@ def handle_item(item: Item, item_index: int, slide, index_start_from_one=True):
 
     handle_pure_text(item.title, item_title_shape, slide)
     handle_pure_text(item.content, item_content_shape, slide)
-
-
-if __name__ == "__main__":
-    # logging level
-    logging.basicConfig(level=logging.INFO)
-
-    # simple test
-    with open("template_example.json") as f:
-        data = json.load(f)
-    slides = parse_json(data)
-
-    ppt = Presentation("template/template_ori.pptx")
-    for slide in slides:
-        if slide.type == "title":
-            title_slide = ppt.slides[TYPE_MAP[slide.type]]
-            slide.render(title_slide)
-        elif slide.type == "acknowledgement":
-            acknowledgement_slide = ppt.slides[TYPE_MAP[slide.type]]
-            slide.render(acknowledgement_slide)
-        else:
-            new_slide = duplicate_slide(ppt, ppt.slides[TYPE_MAP[slide.type]])
-            slide.render(new_slide)
-    ppt.save("gen.pptx")
