@@ -49,3 +49,9 @@ python main.py \
 1. 复制 `yaml_example.yaml`，调整 `type_map` 使其与 PPT 模板的幻灯片顺序一致。
 2. 更新或新增页面块，确保所有期望生成的 slide 类型都拥有正确的字段定义。
 3. 运行脚本时使用 `--yaml_path <your_config.yaml>`，即可加载新的 schema 并与模板贴合。
+
+### 如何标注新的 PPT 模板
+
+- 在 PowerPoint 的「选择窗格」（Selection Pane）中重命名形状，确保名称与 YAML 字段完全一致（例如：`title`、`subtitle`、`item_title1`、`item_content1`、`label1`、`content1`）。
+- 同一页不可出现重复的名称。每个形状名称必须唯一，以便渲染器能准确定位并替换。
+- 可参考 `examples/ppt_gen/templates` 中的现有模板，以及 `yaml_example.yaml` 的字段定义进行命名。

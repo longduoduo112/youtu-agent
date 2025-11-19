@@ -56,3 +56,9 @@ Supported field types include `str`, `int`, `content` (rich text/image/table pay
 1. Duplicate `yaml_example.yaml`, adjust `type_map` to match the slide order in your PPT template.
 2. Update or add page blocks so that every slide type you want the agent to produce has the correct field definitions.
 3. Run the script with `--yaml_path <your_config.yaml>` to load the new schema and automatically align the agent output with your PPT.
+
+### Use custom templates
+
+- Use the **Selection Pane** in PowerPoint to rename shapes so their names exactly match YAML field names (for example: `title`, `subtitle`, `item_title1`, `item_content1`, `label1`, `content1`).
+- **No duplicate names** on the same slide. Each shape name must be unique so the renderer can target it deterministically.
+- **Refer to existing templates** in `examples/ppt_gen/templates` and the field definitions in `yaml_example.yaml` as a naming guide.
