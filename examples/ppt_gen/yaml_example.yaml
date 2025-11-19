@@ -50,7 +50,8 @@ section_title_page:
     type: int
 
 content_page:
-  description: single column content page, with the most basic layout                          type: content
+  description: single column content page, with the most basic layout            
+  type: content
   title:
     type: str
     description: be very concise within 7 words                   
@@ -66,7 +67,7 @@ two_column_content_page:
     description: be very concise within 7 words                   
     max_len: 7
   content:
-    type: content
+    type: content_list
     description: list of exactly 2 BaseContent objects        
     min_len: 2
     max_len: 2
@@ -111,14 +112,14 @@ items_page_4_alt:
     max_len: 4
                               
 items_page_4_key_point:
-  description: this slide is designed to present four key elements, stages, or pillars in a clean, balanced layout. each element is represented by a customizable label — which can be: a letter (e.g., s-w-o-t) or a chinese character (e.g., 增 / 删 / 改 / 查)                        
+  description: "this slide is designed to present four key elements, stages, or pillars in a clean, balanced layout. each element is represented by a customizable label — which can be: a letter (e.g., s-w-o-t) or a chinese character (e.g., 增 / 删 / 改 / 查)"                
   type: items_page_4_key_point
   title:
     type: str
     description: be very concise within 7 words                   
     max_len: 7
   label:
-    type: list[str]
+    type: str_list
     description: be exactly one character/letter/digit
     min_len: 4
     max_len: 4
@@ -140,9 +141,8 @@ items_page_4_img:
     description: exactly 4 items
     min_len: 4
     max_len: 4
-  image_url:
-    type: str
-    description: absolute url
+  image:
+    type: image
 
 item_page_4_growth:
   description: this slide visually represents growth over time, using an upward-sloping bar chart. four key stages or drivers of growth are highlighted on the left, each with an icon (home, battery, lock, chat bubbles) and placeholder text. the design suggests that these factors contribute progressively to overall growth, making it ideal for showing business expansion, performance metrics, or kpis     
@@ -194,4 +194,6 @@ acknowledgement_page:
     description: be very concise within 10 words                  
     max_len: 10
   author:
+    type: str
+  date:
     type: str
