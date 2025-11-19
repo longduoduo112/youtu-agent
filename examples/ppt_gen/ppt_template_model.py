@@ -397,6 +397,94 @@ class AcknowledgementPage(Slide):
         logging.info(f"ppt_type: {self.ppt_type}")
         handle_pure_text(self.ppt_type, ppt_type_shape, slide)
 
+class PageConfig:
+    """Configuration loader for page templates from YAML"""
+    
+    def __init__(self, yaml_file_path: str = "yaml_example.yaml"):
+        self.type_map = {}
+        self.pages = {}
+        self._load_config(yaml_file_path)
+    
+    def _load_config(self, yaml_file_path: str):
+        """Load configuration from YAML file"""
+        try:
+            import yaml
+            with open(yaml_file_path, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+            
+            # Load type_map
+            if 'type_map' in config:
+                for item in config['type_map']:
+                    if isinstance(item, dict):
+                        for key, value in item.items():
+                            self.type_map[key] = value
+            
+            # Load page configurations
+            for key, value in config.items():
+                if key.endswith('_page') and key != 'type_map':
+                    self.pages[key] = value
+                    
+        except Exception as e:
+            logging.error(f"Failed to load YAML config: {e}")
+            # Fallback to hardcoded values
+            self.type_map = TYPE_MAP
+
+    def render(self, slide, page_json: dict[str, Any]):
+        """Render slide based on page configuration and data"""
+        page_type = page_json.get('type', '')
+        logging.info(f"===Rendering page type: {page_type}===")
+        
+        # Get page configuration
+        page_config = self.pages.get(f"{page_type}_page", {})
+        
+        # Render all fields based on their type from YAML config
+        for field_name, field_config in page_config.items():
+            if field_name == 'type' or field_name == 'description':
+                continue
+                
+            field_value = page_json.get(field_name)
+            if field_value is None:
+                continue
+                
+            field_type = field_config.get('type', 'str')
+            
+            if field_type == 'str':
+                self._render_text_field(slide, field_name, field_value)
+            elif field_type == 'content':
+                self._render_content_field(slide, field_name, field_value)
+            elif field_type == 'item_list':
+                self._render_item_list_field(slide, field_name, field_value)
+            elif field_type == 'list[str]':
+                self._render_label_list_field(slide, field_name, field_value)
+    
+    def _render_text_field(self, slide, field_name: str, text_value: str):
+        """Render text field"""
+        logging.info(f"{field_name}: {text_value}")
+        shape = find_shape_with_name_except(slide.shapes, field_name)
+        if shape:
+            handle_pure_text(text_value, shape, slide)
+    
+    def _render_content_field(self, slide, field_name: str, content_value):
+        """Render content field"""
+        logging.info(f"{field_name}: {content_value}")
+        # Use the field name directly to find the shape
+        shape = find_shape_with_name_except(slide.shapes, field_name)
+        if shape:
+            handle_content(content_value, shape, slide)
+    
+    def _render_item_list_field(self, slide, field_name: str, items: list):
+        """Render item list field"""
+        for ind, item in enumerate(items):
+            logging.info(f"{field_name} {ind}: {item}")
+            handle_item(item, ind, slide)
+    
+    def _render_label_list_field(self, slide, field_name: str, labels: list):
+        """Render label list field"""
+        for i, label_text in enumerate(labels):
+            label_shape = find_shape_with_name_except(slide.shapes, f"label{i+1}")
+            if label_shape:
+                logging.info(f"label{i+1}: {label_text}")
+                handle_pure_text(label_text, label_shape, slide)
 
 def parse_json(json_data: dict[str, Any]) -> list[Slide]:
     slides = []
