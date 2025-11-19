@@ -13,8 +13,6 @@ type_map:
   - item_page_5_sequence: 11
   - acknowledgement: 12
 
-# page -> [properties]
-# property -> {type, default, value, description, min_len=0, max_len=10}                     # type -> content | str | item_list | item | fixed            
 title_page:
   description: title page, should always be the first page      
   type: title
