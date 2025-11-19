@@ -16,7 +16,7 @@ uv sync --extra ppt-gen
 
 ## Quick Start
 
-Download [template files](https://cdn.jsdelivr.net/gh/TencentCloudADP-DevRel/picgo-images@main/assets/templates.zip) to `examples/ppt_gen/templates` directory.
+Download [template files](https://cdn.jsdelivr.net/gh/TencentCloudADP-DevRel/picgo-images@main/assets/templates.zip) to `examples/ppt_gen/template` directory.
 
 Navigate to the example directory, prepare the reference resource (plain text / markdown / html webpage) for PPT generation. For example, download the [Nobel Prize webpage](https://www.nobelprize.org/prizes/physics/2025/popular-information/).
 
