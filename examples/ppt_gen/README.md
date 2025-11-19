@@ -35,10 +35,10 @@ Run the PPT generation script.
 ```python
 python main.py \
   --file webpage.html \
-  --template_path templates/0.pptx \
+  --template_path template/0.pptx \
   --yaml_path yaml_example.yaml \
-  --pages 10
-  --disable_tooluse
+  --pages 10 \
+  --disable_tooluse \
   --extra_prompt "Language should be English."
 ```
 
