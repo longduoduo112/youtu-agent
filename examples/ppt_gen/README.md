@@ -1,5 +1,7 @@
 # PowerPoint Template Example
 
+> [中文README](README.zh.md)
+
 ## Prerequisites
 
 This example requires additional dependencies for image processing, document handling, and visualization.

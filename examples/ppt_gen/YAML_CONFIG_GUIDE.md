@@ -1,5 +1,7 @@
 # PPT YAML Configuration Guide
 
+> [中文YAML配置指南](./YAML_CONFIG_GUIDE.zh.md)
+
 This document explains how to describe PPT templates with YAML so that the `ppt_gen` example can generate consistent slides across different topics and layouts.
 
 ## YAML file layout

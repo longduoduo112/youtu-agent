@@ -39,6 +39,8 @@ python main.py \
 
 ## YAML 驱动的模板配置
 
+> 详见 [YAML 配置指南](YAML_CONFIG_GUIDE.zh.md)。
+
 套模板流程由 YAML 配置驱动（参见 `yaml_example.yaml`），配置文件主要有两部分：
 
 1. **type_map**：将每类幻灯片的 `type`（如 `title`, `items_page_4`）映射到模板 PPT 中的幻灯片索引，渲染器据此复制对应母板。
