@@ -28,12 +28,29 @@ Each field under a page block can use the following attributes:
 
 | Field type        | Meaning / Rendering behavior |
 |-------------------|------------------------------|
-| `str` / `int`     | Plain text or integer written directly into the named shape. |
-| `content`         | Rich block (`TextContent`, `ImageContent`, or `TableContent`) rendered via `handle_content`. |
-| `content_list`    | Ordered array of `BaseContent`; each entry maps to `<field_name>1`, `<field_name>2`, etc. |
+| `str` / `int`     | Plain text or integer written directly into the named shape. `int` is cast to string before rendering. |
+| `content`         | Rich block rendered through `handle_content`, accepting the structures listed below (`TextContent`, `ImageContent`, `TableContent`). |
+| `content_list`    | Ordered array of `BaseContent` (same payload as `content`); entries are mapped onto `<field_name>1`, `<field_name>2`, etc. |
 | `item_list`       | Array of `Item` objects (title + content) rendered with `handle_item`. |
 | `str_list`        | List of short labels (e.g., SWOT letters) mapped to `label1`, `label2`, ... shapes. |
 | `image`           | `BasicImage` with an `image_url`, placed into an image placeholder. |
+
+### Payload structure reference
+
+These field types serialize directly into the pydantic models defined in [`ppt_template_model.py`](./ppt_template_model.py):
+
+1. **`content` / `content_list`** → `BaseContent` union (`content_type` chooses the concrete model):
+   - `TextContent`: `{"content_type": "text", "paragraph": [Paragraph]|str}` where `Paragraph` objects carry `{text, bullet, level}`.
+   - `ImageContent`: `{"content_type": "image", "image_url": "https://...", "caption": "optional"}`.
+   - `TableContent`: `{"content_type": "table", "header": [str], "rows": [[str]], "n_rows": int, "n_cols": int, "caption": "optional"}`.
+
+2. **`item_list`** → list of `Item` objects: `{"title": "2-4 words", "content": "≤10 words"}`. Rendering pairs each entry with shapes named `item_title{n}` / `item_content{n}`.
+
+3. **`image`** → single `BasicImage`: `{"image_url": "https://..."}`. The renderer downloads and inserts it into the placeholder, deleting the original shape afterward.
+
+4. **`str_list`** → simple string array. The YAML `max_len`/`min_len` constraints are propagated into the JSON schema; rendering targets shapes named `label1`, `label2`, ... in order.
+
+5. **`content_list`** (additional detail): each entry is treated like a standalone `content` field. Name your shapes `<field_name>1`, `<field_name>2`, etc., to match the order.
 
 > ⚠️ **Template labeling:** Ensure the shapes on the PPT slide use the same names as the YAML fields so `fill_template_with_yaml_config` can find and replace the correct placeholders.
 
