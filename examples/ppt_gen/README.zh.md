@@ -14,7 +14,7 @@ uv sync --extra ppt-gen
 
 ## 快速开始
 
-1. 下载[模板文件](https://cdn.jsdelivr.net/gh/TencentCloudADP-DevRel/picgo-images@main/assets/templates.zip)到 `examples/ppt_gen/template` 目录。
+1. 下载[模板文件](https://cdn.jsdelivr.net/gh/TencentCloudADP-DevRel/picgo-images@main/assets/templates.zip)到 `examples/ppt_gen/templates` 目录。
 2. 准备需要转成 PPT 的参考资料（纯文本、Markdown 或网页）。例如下载 [诺贝尔奖介绍网页](https://www.nobelprize.org/prizes/physics/2025/popular-information/)。
 
 ```bash

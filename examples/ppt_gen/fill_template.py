@@ -56,7 +56,7 @@ if __name__ == "__main__":
     import datetime
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--template", type=str, default="template/0.pptx")
+    parser.add_argument("-t", "--template", type=str, default="templates/0.pptx")
     default_output_filename = f"output-{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.pptx"
     parser.add_argument("-o", "--output", type=str, default=default_output_filename)
     parser.add_argument("-i", "--input", type=str, required=True)
