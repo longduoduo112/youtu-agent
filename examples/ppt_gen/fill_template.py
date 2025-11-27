@@ -36,9 +36,16 @@ def fill_template_with_yaml_config(template_path, output_path, json_data, yaml_c
 
         page_config.render(target_slide, slide_data)
 
-    delete_slide_range(prs, range(2, 12))
-    delete_slide(prs, 0)
-    move_slide(prs, 1, len(prs.slides) - 1)
+    # get title page 
+    title_pages_idx = page_config.type_map.get("title")
+    acknowledgement_pages_idx = page_config.type_map.get("acknowledgement")
+    max_idx = max([item for item in page_config.type_map.values()])
+    # move title page to the first
+    move_slide(prs, title_pages_idx, 0)
+    # move acknowledgement page to the last
+    move_slide(prs, acknowledgement_pages_idx, len(prs.slides) - 1)
+    # remove all
+    delete_slide_range(prs, range(1, max_idx))
     prs.save(output_path)
 
 
