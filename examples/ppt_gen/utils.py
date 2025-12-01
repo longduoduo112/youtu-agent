@@ -1,9 +1,13 @@
 import copy
+from copy import deepcopy
 import logging
 import random
+from lxml import etree
 
 import matplotlib
 from pptx.enum.shapes import MSO_SHAPE_TYPE
+from pptx.opc.constants import CONTENT_TYPE as CT
+from pptx.oxml.ns import qn
 
 # rgb colors from a color scheme
 _color_palette = [
@@ -24,6 +28,18 @@ _color_palette = [
     (65, 105, 225),  # Royal Blue
 ]
 
+
+# 常见 content-type -> reltype 映射（可扩展）
+CONTENT_TYPE_TO_RELTYPE = {
+    'image/jpeg': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
+    'image/png':  'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
+    'image/gif':  'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
+    'application/vnd.openxmlformats-officedocument.drawingml.chart+xml':
+        'http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart',
+    'application/vnd.openxmlformats-officedocument.oleObject': 
+        'http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject',
+    # 根据需要添加更多映射
+}
 
 def inspect_ppt(prs):
     """
@@ -124,6 +140,7 @@ def find_shape_with_name_except(shapes, name, depth=0):
     if depth == 0:
         logging.info(f"Finding shape with name: {name}")
     for shape in shapes:
+        logging.debug(f"{depth * '  '} inspect shape: {shape.name}")
         if shape.name == name:
             return shape
         if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
@@ -132,60 +149,6 @@ def find_shape_with_name_except(shapes, name, depth=0):
                 return found
     raise Exception(f"Shape with name {name} not found")
 
-
-# def duplicate_slide(prs, slide):
-#     slide_layout = slide.slide_layout
-#     new_slide = prs.slides.add_slide(slide_layout)
-
-#     for shape in slide.shapes:
-#         if not shape.is_placeholder:
-#             el = shape.element
-#             new_el = copy.deepcopy(el)
-
-#             # 处理图片 - 使用 python-pptx 内置命名空间
-#             try:
-#                 blips = new_el.xpath(".//a:blip[@r:embed]")
-
-#                 for blip in blips:
-#                     old_rId = blip.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")
-
-#                     if old_rId:
-#                         # 获取原始图片
-#                         old_image_part = slide.part.related_part(old_rId)
-
-#                         # 在新幻灯片中建立关系
-#                         new_rId = new_slide.part.relate_to(
-#                             old_image_part, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
-#                         )
-
-#                         # 更新 rId
-#                         blip.set("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed", new_rId)
-
-#             except (KeyError, AttributeError):
-#                 pass
-
-#             new_slide.shapes._spTree.insert_element_before(new_el, "p:extLst")
-#         else:
-#             ph = new_slide.shapes[shape.placeholder_format.idx]
-#             ph.text = shape.text
-
-#     return new_slide
-
-import copy
-from pptx.opc.constants import CONTENT_TYPE as CT
-from pptx.oxml.ns import qn
-
-# 常见 content-type -> reltype 映射（可扩展）
-CONTENT_TYPE_TO_RELTYPE = {
-    'image/jpeg': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
-    'image/png':  'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
-    'image/gif':  'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
-    'application/vnd.openxmlformats-officedocument.drawingml.chart+xml':
-        'http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart',
-    'application/vnd.openxmlformats-officedocument.oleObject': 
-        'http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject',
-    # 根据需要添加更多映射
-}
 
 def _get_reltype_for_part(part):
     ctype = getattr(part, 'content_type', None)
@@ -242,9 +205,30 @@ def _copy_and_fix_relations(original_slide, new_slide, new_el):
                     el.set(attr_name, new_rId)
     return True
 
+def copy_background(source_slide, target_slide):
+    source_cSld = source_slide.element.cSld
+    target_cSld = target_slide.element.cSld
+    
+    # 定义命名空间
+    ns = {'p': 'http://schemas.openxmlformats.org/presentationml/2006/main'}
+    
+    # 移除目标背景（bg或bgPr）
+    for bg in target_cSld.findall('.//p:bg', namespaces=ns):
+        target_cSld.remove(bg)
+    for bgPr in target_cSld.findall('.//p:bgPr', namespaces=ns):
+        target_cSld.remove(bgPr)
+    
+    # 复制源背景（必须插入到spTree之前）
+    source_bg = source_cSld.find('.//p:bg', namespaces=ns)
+    if source_bg is not None:
+        spTree = target_cSld.find('.//p:spTree', namespaces=ns)
+        target_cSld.insert(target_cSld.index(spTree), deepcopy(source_bg))
+
 def duplicate_slide(prs, slide):
     slide_layout = slide.slide_layout
     new_slide = prs.slides.add_slide(slide_layout)
+    
+    copy_background(slide, new_slide)
 
     for shape in slide.shapes:
         el = shape.element
@@ -258,6 +242,46 @@ def duplicate_slide(prs, slide):
 
     return new_slide
 
+# def duplicate_slide(prs, slide):
+#     slide_layout = slide.slide_layout
+#     new_slide = prs.slides.add_slide(slide_layout)
+    
+#     parent = new_slide.background._element.getparent()
+#     # 找到当前background在父节点中的位置
+#     index = parent.index(new_slide.background._element)
+#     # 删除旧的，插入新的
+#     parent.remove(new_slide.background._element)
+#     parent.insert(index, copy.deepcopy(slide.background._element))
+
+#     for shape in slide.shapes:
+#         el = shape.element
+#         new_el = copy.deepcopy(el)
+
+#         # 处理图片 - 使用 python-pptx 内置命名空间
+#         try:
+#             blips = new_el.xpath(".//a:blip[@r:embed]")
+
+#             for blip in blips:
+#                 old_rId = blip.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")
+
+#                 if old_rId:
+#                     # 获取原始图片
+#                     old_image_part = slide.part.related_part(old_rId)
+
+#                     # 在新幻灯片中建立关系
+#                     new_rId = new_slide.part.relate_to(
+#                         old_image_part, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+#                     )
+
+#                     # 更新 rId
+#                     blip.set("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed", new_rId)
+
+#         except (KeyError, AttributeError):
+#             pass
+
+#         new_slide.shapes._spTree.insert_element_before(new_el, "p:extLst")
+
+#     return new_slide
 
 def delete_slide_range(prs, index_range):
     """delete slides in the given index range

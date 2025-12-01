@@ -2,6 +2,8 @@ import argparse
 import asyncio
 import datetime
 import json
+from pathlib import Path
+import logging
 
 import yaml
 from fill_template import extract_json, fill_template_with_yaml_config
@@ -29,8 +31,9 @@ async def main():
     parser.add_argument("--extra_prompt", type=str, default="")
     parser.add_argument("--pages", type=int, default=15)
     parser.add_argument("--url", type=str, default=None)
-    parser.add_argument("--template_path", type=str, default="templates/0.pptx")
-    parser.add_argument("--yaml_path", type=str, default="yaml_example.yaml")
+    parser.add_argument("--template_path", type=str, default="templates")
+    parser.add_argument("--template_name", type=str, default="11")
+    parser.add_argument("--yaml_path", type=str, default="yaml_new_template.yaml")
     parser.add_argument("--output_path", type=str, default=f"output-{current_date}.pptx")
     parser.add_argument("--output_json", type=str, default=f"output-{current_date}.json")
     parser.add_argument("--disable_tooluse", action="store_true")
@@ -38,6 +41,16 @@ async def main():
 
     with open(args.yaml_path) as f:
         yaml_config = yaml.safe_load(f)
+    template_yaml_path = Path(args.template_path) / args.template_name / f"{args.template_name}.yaml"
+    with open(template_yaml_path) as f:
+        template_yaml_config = yaml.safe_load(f)
+    
+    if template_yaml_config is None:
+        logging.warning("Template yaml config is None")
+    else:
+        # merge yaml_config and template_yaml_config
+        yaml_config.update(template_yaml_config)
+    
     schema = build_schema(yaml_config)
 
     # add json schema to instructions
@@ -75,8 +88,10 @@ async def main():
         f.write(final_result)
 
     json_data = extract_json(final_result)
+    
+    template_pptx_path = Path(args.template_path) / args.template_name / f"{args.template_name}.pptx"
     fill_template_with_yaml_config(
-        template_path=args.template_path,
+        template_path=template_pptx_path,
         output_path=args.output_path,
         json_data=json_data,
         yaml_config=yaml_config,
