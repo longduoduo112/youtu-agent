@@ -163,9 +163,9 @@ class PageConfig:
     def _render_label_list_field(self, slide, field_name: str, labels: list):
         """Render label list field"""
         for i, label_text in enumerate(labels):
-            label_shape = find_shape_with_name_except(slide.shapes, f"label{i + 1}")
+            label_shape = find_shape_with_name_except(slide.shapes, f"{field_name}{i + 1}")
             if label_shape:
-                logging.info(f"label{i + 1}: {label_text}")
+                logging.info(f"{field_name}{i + 1}: {label_text}")
                 handle_pure_text(label_text, label_shape, slide)
 
     def _ensure_basic_image_model(self, image_value: Any) -> BasicImage:
