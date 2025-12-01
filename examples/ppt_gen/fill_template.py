@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--template", type=str, default="templates")
-    parser.add_argument("-n", "--template_name", type=str, default="11")
+    parser.add_argument("-n", "--template_name", type=str, default="0")
     default_output_filename = f"output-{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.pptx"
     parser.add_argument("-o", "--output", type=str, default=default_output_filename)
     parser.add_argument("-i", "--input", type=str, required=True)
@@ -87,15 +87,16 @@ if __name__ == "__main__":
     with open(args.yaml_config) as f:
         yaml_config = yaml.safe_load(f)
     template_yaml = Path(template) / args.template_name / f"{args.template_name}.yaml"
-    with open(template_yaml) as f:
-        template_config = yaml.safe_load(f)
-    # merge
-    if template_config is None:
+    if not template_yaml.exists():
         template_config = {}
+    else:
+        with open(template_yaml) as f:
+            template_config = yaml.safe_load(f)
+    # merge
     yaml_config.update(template_config)
     
     print(json.dumps(yaml_config, indent=4))
-        
+    
     template_path = Path(template) / args.template_name / f"{args.template_name}.pptx"
 
     fill_template_with_yaml_config(template_path, output, json_data, yaml_config)

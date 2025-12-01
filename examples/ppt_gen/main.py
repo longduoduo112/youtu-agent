@@ -32,8 +32,8 @@ async def main():
     parser.add_argument("--pages", type=int, default=15)
     parser.add_argument("--url", type=str, default=None)
     parser.add_argument("--template_path", type=str, default="templates")
-    parser.add_argument("--template_name", type=str, default="11")
-    parser.add_argument("--yaml_path", type=str, default="yaml_new_template.yaml")
+    parser.add_argument("--template_name", type=str, default="0")
+    parser.add_argument("--yaml_path", type=str, default="yaml_example.yaml")
     parser.add_argument("--output_path", type=str, default=f"output-{current_date}.pptx")
     parser.add_argument("--output_json", type=str, default=f"output-{current_date}.json")
     parser.add_argument("--disable_tooluse", action="store_true")
@@ -42,14 +42,15 @@ async def main():
     with open(args.yaml_path) as f:
         yaml_config = yaml.safe_load(f)
     template_yaml_path = Path(args.template_path) / args.template_name / f"{args.template_name}.yaml"
-    with open(template_yaml_path) as f:
-        template_yaml_config = yaml.safe_load(f)
-    
-    if template_yaml_config is None:
-        logging.warning("Template yaml config is None")
+    if not template_yaml_path.exists():
+        logging.warning("Template yaml config not found")
+        template_yaml_config = {}
     else:
-        # merge yaml_config and template_yaml_config
-        yaml_config.update(template_yaml_config)
+        with open(template_yaml_path) as f:
+            template_yaml_config = yaml.safe_load(f)
+    
+    # merge yaml_config and template_yaml_config
+    yaml_config.update(template_yaml_config)
     
     schema = build_schema(yaml_config)
 
