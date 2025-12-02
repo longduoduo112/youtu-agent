@@ -58,7 +58,7 @@ def extract_json(content):
     match = re.search(pattern, content, re.DOTALL)
     if match:
         return match.group(1)
-    return None
+    return content
 
 
 if __name__ == "__main__":
