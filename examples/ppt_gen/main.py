@@ -4,6 +4,7 @@ import datetime
 import json
 from pathlib import Path
 import logging
+import re
 
 import yaml
 from fill_template import extract_json, fill_template_with_yaml_config
@@ -85,10 +86,12 @@ async def main():
     final_result = result.final_output
     print(final_result)
 
-    with open(args.output_json, "w") as f:
-        f.write(final_result)
-
     json_data = extract_json(final_result)
+    if not json_data:
+        raise ValueError("No JSON data found in output")
+    
+    with open(args.output_json, "w") as f:
+        f.write(json_data)
     
     template_pptx_path = Path(args.template_path) / args.template_name / f"{args.template_name}.pptx"
     fill_template_with_yaml_config(

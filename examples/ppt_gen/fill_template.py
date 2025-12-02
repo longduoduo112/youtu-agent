@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Any
 from pathlib import Path
+import re
 
 import yaml
 from ppt_template_model import PageConfig
@@ -53,8 +54,11 @@ def extract_json(content):
     Extract the json data from the given content.
     """
     # extract content within "```json" and "```"
-    json_data = content.split("```json")[1].split("```")[0]
-    return json_data
+    pattern = r'```json(.*?)```'
+    match = re.search(pattern, content, re.DOTALL)
+    if match:
+        return match.group(1)
+    return None
 
 
 if __name__ == "__main__":
@@ -83,7 +87,8 @@ if __name__ == "__main__":
     with open(input_json) as f:
         content = f.read()
     json_data = extract_json(content)
-
+    if not json_data:
+        raise ValueError("No JSON data found in input file")
     with open(args.yaml_config) as f:
         yaml_config = yaml.safe_load(f)
     template_yaml = Path(template) / args.template_name / f"{args.template_name}.yaml"
