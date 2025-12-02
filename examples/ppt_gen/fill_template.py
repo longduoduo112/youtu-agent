@@ -1,13 +1,13 @@
 import json
 import logging
-from typing import Any
-from pathlib import Path
 import re
+from pathlib import Path
+from typing import Any
 
 import yaml
 from ppt_template_model import PageConfig
 from pptx import Presentation
-from utils import delete_slide, delete_slide_range, duplicate_slide, move_slide
+from utils import delete_slide_range, duplicate_slide, move_slide
 
 
 def fill_template_with_yaml_config(template_path, output_path, json_data, yaml_config: dict[str, Any]):
@@ -36,10 +36,10 @@ def fill_template_with_yaml_config(template_path, output_path, json_data, yaml_c
 
         page_config.render(target_slide, slide_data)
 
-    # get title page 
+    # get title page
     title_pages_idx = page_config.type_map.get("title_page")
     acknowledgement_pages_idx = page_config.type_map.get("acknowledgement_page")
-    max_idx = max([item for item in page_config.type_map.values()])
+    max_idx = max(list(page_config.type_map.values()))
     # move title page to the first
     move_slide(prs, title_pages_idx, 0)
     # move acknowledgement page to the last
@@ -54,7 +54,7 @@ def extract_json(content):
     Extract the json data from the given content.
     """
     # extract content within "```json" and "```"
-    pattern = r'```json(.*?)```'
+    pattern = r"```json(.*?)```"
     match = re.search(pattern, content, re.DOTALL)
     if match:
         return match.group(1)
@@ -99,9 +99,9 @@ if __name__ == "__main__":
             template_config = yaml.safe_load(f)
     # merge
     yaml_config.update(template_config)
-    
+
     print(json.dumps(yaml_config, indent=4))
-    
+
     template_path = Path(template) / args.template_name / f"{args.template_name}.pptx"
 
     fill_template_with_yaml_config(template_path, output, json_data, yaml_config)

@@ -1,13 +1,10 @@
 import copy
-from copy import deepcopy
 import logging
 import random
-from lxml import etree
+from copy import deepcopy
 
 import matplotlib
 from pptx.enum.shapes import MSO_SHAPE_TYPE
-from pptx.opc.constants import CONTENT_TYPE as CT
-from pptx.oxml.ns import qn
 
 # rgb colors from a color scheme
 _color_palette = [
@@ -31,15 +28,14 @@ _color_palette = [
 
 # 常见 content-type -> reltype 映射（可扩展）
 CONTENT_TYPE_TO_RELTYPE = {
-    'image/jpeg': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
-    'image/png':  'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
-    'image/gif':  'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
-    'application/vnd.openxmlformats-officedocument.drawingml.chart+xml':
-        'http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart',
-    'application/vnd.openxmlformats-officedocument.oleObject': 
-        'http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject',
+    "image/jpeg": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+    "image/png": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+    "image/gif": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+    "application/vnd.openxmlformats-officedocument.drawingml.chart+xml": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart",
+    "application/vnd.openxmlformats-officedocument.oleObject": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject",
     # 根据需要添加更多映射
 }
+
 
 def inspect_ppt(prs):
     """
@@ -151,10 +147,11 @@ def find_shape_with_name_except(shapes, name, depth=0):
 
 
 def _get_reltype_for_part(part):
-    ctype = getattr(part, 'content_type', None)
+    ctype = getattr(part, "content_type", None)
     if not ctype:
         return None
     return CONTENT_TYPE_TO_RELTYPE.get(ctype)
+
 
 def _copy_and_fix_relations(original_slide, new_slide, new_el):
     """
@@ -168,8 +165,8 @@ def _copy_and_fix_relations(original_slide, new_slide, new_el):
     for el in new_el.iter():
         # el.attrib 是字典，key 可能是 '{namespace}attrname'
         for attr_name in list(el.attrib.keys()):
-            if attr_name.startswith('{%s}' % r_ns):
-                attr_local = attr_name.split('}', 1)[1]
+            if attr_name.startswith(f"{{{r_ns}}}"):
+                # attr_local = attr_name.split("}", 1)[1]
                 old_rId = el.attrib[attr_name]
                 if not old_rId:
                     continue
@@ -189,7 +186,7 @@ def _copy_and_fix_relations(original_slide, new_slide, new_el):
                 reltype = _get_reltype_for_part(part)
                 # fallback: 如果没映射到 reltype，使用 image 作为最后手段（保守策略）
                 if reltype is None:
-                    reltype = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image'
+                    reltype = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
 
                 # 在 new_slide 上建立到该 part 的关系（如果之前已建立，相同 part 会创建重复关系——可用缓存优化）
                 try:
@@ -197,7 +194,9 @@ def _copy_and_fix_relations(original_slide, new_slide, new_el):
                 except Exception:
                     # 有时 relate_to 会抛异常（例如 part 类型不支持），尝试用 image reltype 作为降级
                     try:
-                        new_rId = new_slide.part.relate_to(part, 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image')
+                        new_rId = new_slide.part.relate_to(
+                            part, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+                        )
                     except Exception:
                         new_rId = None
 
@@ -205,29 +204,31 @@ def _copy_and_fix_relations(original_slide, new_slide, new_el):
                     el.set(attr_name, new_rId)
     return True
 
+
 def copy_background(source_slide, target_slide):
     source_cSld = source_slide.element.cSld
     target_cSld = target_slide.element.cSld
-    
+
     # 定义命名空间
-    ns = {'p': 'http://schemas.openxmlformats.org/presentationml/2006/main'}
-    
+    ns = {"p": "http://schemas.openxmlformats.org/presentationml/2006/main"}
+
     # 移除目标背景（bg或bgPr）
-    for bg in target_cSld.findall('.//p:bg', namespaces=ns):
+    for bg in target_cSld.findall(".//p:bg", namespaces=ns):
         target_cSld.remove(bg)
-    for bgPr in target_cSld.findall('.//p:bgPr', namespaces=ns):
+    for bgPr in target_cSld.findall(".//p:bgPr", namespaces=ns):
         target_cSld.remove(bgPr)
-    
+
     # 复制源背景（必须插入到spTree之前）
-    source_bg = source_cSld.find('.//p:bg', namespaces=ns)
+    source_bg = source_cSld.find(".//p:bg", namespaces=ns)
     if source_bg is not None:
-        spTree = target_cSld.find('.//p:spTree', namespaces=ns)
+        spTree = target_cSld.find(".//p:spTree", namespaces=ns)
         target_cSld.insert(target_cSld.index(spTree), deepcopy(source_bg))
+
 
 def duplicate_slide(prs, slide):
     slide_layout = slide.slide_layout
     new_slide = prs.slides.add_slide(slide_layout)
-    
+
     copy_background(slide, new_slide)
 
     for shape in slide.shapes:
@@ -238,14 +239,15 @@ def duplicate_slide(prs, slide):
         _copy_and_fix_relations(slide, new_slide, new_el)
 
         # 将 new_el 插入 new_slide 的 spTree，插入到 extLst 之前（与之前一致）
-        new_slide.shapes._spTree.insert_element_before(new_el, 'p:extLst')
+        new_slide.shapes._spTree.insert_element_before(new_el, "p:extLst")
 
     return new_slide
+
 
 # def duplicate_slide(prs, slide):
 #     slide_layout = slide.slide_layout
 #     new_slide = prs.slides.add_slide(slide_layout)
-    
+
 #     parent = new_slide.background._element.getparent()
 #     # 找到当前background在父节点中的位置
 #     index = parent.index(new_slide.background._element)
@@ -282,6 +284,7 @@ def duplicate_slide(prs, slide):
 #         new_slide.shapes._spTree.insert_element_before(new_el, "p:extLst")
 
 #     return new_slide
+
 
 def delete_slide_range(prs, index_range):
     """delete slides in the given index range
@@ -335,13 +338,15 @@ def replace_picture_keep_format(slide, shape_index, new_image_path):
 
     return shape
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--ppt", required=True)
     parser.add_argument("--method", required=True)
     args = parser.parse_args()
-    
+
     from pptx import Presentation
 
     prs = Presentation(args.ppt)
@@ -351,4 +356,3 @@ if __name__ == '__main__':
         to_svg(prs, args.ppt, "test.svg")
     else:
         raise ValueError(f"Unknown method: {args.method}")
-    

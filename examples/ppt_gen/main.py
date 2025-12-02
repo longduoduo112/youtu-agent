@@ -2,9 +2,8 @@ import argparse
 import asyncio
 import datetime
 import json
-from pathlib import Path
 import logging
-import re
+from pathlib import Path
 
 import yaml
 from fill_template import extract_json, fill_template_with_yaml_config
@@ -49,10 +48,10 @@ async def main():
     else:
         with open(template_yaml_path) as f:
             template_yaml_config = yaml.safe_load(f)
-    
+
     # merge yaml_config and template_yaml_config
     yaml_config.update(template_yaml_config)
-    
+
     schema = build_schema(yaml_config)
 
     # add json schema to instructions
@@ -89,10 +88,10 @@ async def main():
     json_data = extract_json(final_result)
     if not json_data:
         raise ValueError("No JSON data found in output")
-    
+
     with open(args.output_json, "w") as f:
         f.write(json_data)
-    
+
     template_pptx_path = Path(args.template_path) / args.template_name / f"{args.template_name}.pptx"
     fill_template_with_yaml_config(
         template_path=template_pptx_path,

@@ -87,7 +87,7 @@ class PageConfig:
         logging.info(f"===Rendering page type: {page_type}===")
 
         # Get page configuration
-        
+
         page_config = self.pages.get(page_type, {})
 
         # Render all fields based on their type from YAML config
