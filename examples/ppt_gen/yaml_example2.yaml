@@ -7,7 +7,7 @@ title_page:
     max_len: 7
   subtitle:
     type: str
-    description: be very concise within 10 words                  
+    description: be very concise within 6 words                  
     max_len: 10
   date:
     type: str
@@ -27,7 +27,7 @@ section_title_page:
     max_len: 7
   subtitle:
     type: str
-    description: be very concise within 10 words                  
+    description: be very concise within 6 words                  
     max_len: 10
 
 content_page:
@@ -71,7 +71,7 @@ items_3_with_subtitle_page:
     max_len: 5
   subtitle:
     type: str
-    description: be very concise within 10 words                  
+    description: be very concise within 6 words                  
     max_len: 10
   items:
     type: item_list
@@ -132,7 +132,7 @@ acknowledgement_page:
     description: just place "Thank you"/"谢谢"/"END"/"FIN" here                                
   subtitle:
     type: str
-    description: be very concise within 10 words                  
+    description: be very concise within 6 words                  
     max_len: 10
   author:
     type: str
