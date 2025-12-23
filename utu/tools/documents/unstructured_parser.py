@@ -1,3 +1,8 @@
+"""
+https://github.com/Unstructured-IO/unstructured
+Supported file types: https://docs.unstructured.io/open-source/ingestion/supported-file-types
+"""
+
 from ...utils import EnvUtils, get_logger
 
 logger = get_logger(__name__)
