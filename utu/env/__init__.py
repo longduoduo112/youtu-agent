@@ -1,6 +1,6 @@
 from ..config import AgentConfig
 from ..utils import DIR_ROOT
-from .base_env import BaseEnv, BasicEnv
+from .base_env import BaseEnv, _BaseEnv
 from .browser_env import BrowserEnv
 from .browser_env_e2b import BrowserE2BEnv
 from .browser_tione_env import BrowserTioneEnv
@@ -8,12 +8,12 @@ from .e2b_env import E2BEnv
 from .shell_local_env import ShellLocalEnv
 
 
-async def get_env(config: AgentConfig, trace_id: str) -> BaseEnv:
+async def get_env(config: AgentConfig, trace_id: str) -> _BaseEnv:
     if (not config.env) or (not config.env.name):
-        return BasicEnv()
+        return BaseEnv()
     match config.env.name:
         case "base":
-            return BasicEnv()
+            return BaseEnv()
         case "shell_local":
             workspace = DIR_ROOT / "workspace" / trace_id
             workspace.mkdir(parents=True, exist_ok=True)
