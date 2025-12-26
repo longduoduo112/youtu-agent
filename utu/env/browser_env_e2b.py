@@ -3,7 +3,7 @@ import logging
 from agents import Tool
 
 from ..config import ToolkitConfig
-from ..tools.utils import AgentsMCPUtils
+from ..utils import AgentsMCPUtils
 from .base_env import BaseEnv
 
 logger = logging.getLogger(__name__)
