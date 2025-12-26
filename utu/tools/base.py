@@ -33,9 +33,15 @@ class AsyncBaseToolkit:
             self.e2b_sandbox: AsyncSandbox = None
 
     def setup_env(self, env: "_BaseEnv") -> None:
+        """Setup env and workspace."""
         self.env = env
         if self.env_mode == "e2b":  # assert is E2BEnv
             self.e2b_sandbox = env.sandbox
+        self.setup_workspace()
+
+    def setup_workspace(self, workspace_root: str = None):
+        """Setup workspace. Implemented inside specific toolkits."""
+        pass
 
     @property
     def tools_map(self) -> dict[str, Callable]:
