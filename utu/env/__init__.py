@@ -1,5 +1,4 @@
 from ..config import AgentConfig
-from ..utils import DIR_ROOT
 from .base_env import BaseEnv, _BaseEnv
 from .browser_env import BrowserEnv
 from .browser_env_e2b import BrowserE2BEnv
@@ -15,10 +14,7 @@ async def get_env(config: AgentConfig, trace_id: str) -> _BaseEnv:
         case "base":
             return BaseEnv()
         case "shell_local":
-            workspace = DIR_ROOT / "workspace" / trace_id
-            workspace.mkdir(parents=True, exist_ok=True)
-            print(f"> Workspace: {workspace}")
-            return ShellLocalEnv(workspace)
+            return ShellLocalEnv(config.env.config, trace_id)
         case "e2b":
             return E2BEnv(config.env.config)
         case "browser_docker":
