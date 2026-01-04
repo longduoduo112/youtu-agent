@@ -32,7 +32,7 @@
 
 ## 🗞️ ニュース
 
-- 🚀 [2026-01-04] **Youtu Tip & Youtu-LLM リリース！** 私達は、オフラインモデル（Ollama経由）を使用してファイル読み取りやWebブラウジングなどのタスクを自動化するmacOSデスクトップAIアシスタント、[**Youtu Tip**](https://github.com/TencentCloudADP/youtu-tip) を紹介できることを嬉しく思います。また、STEM、コーディング、エージェントタスク向けに特化した **Youtu-LLM**（1.96Bパラメータ、128Kコンテキスト）もリリースしました。[公式サイト](https://youtu-tip.com/); [GitHub](https://github.com/TencentCloudADP/youtu-tip)。
+- 🚀 [2026-01-04] **Youtu Tip & Youtu-LLM リリース！** 私達は、Youtu-AgentのmacOS用拡張機能であり、オフラインモデル（Ollama経由）で動作する [**Youtu-Tip**](https://youtu-tip.com/) を紹介できることを嬉しく思います。ファイル読み取りやWebブラウジングなどのタスクを自動化します。将来的には、Youtu-Agentで構築したエージェントをYoutu-Tipを使ってさらに簡単に実行できるようになります。また、内蔵の [**Youtu-LLM**](https://github.com/TencentCloudADP/youtu-tip/tree/master/youtu-llm) もぜひお試しください。
 
 - 🚀 [2025-12-10] **Youtu-Agent x Agent-Lightning トレーニング統合が利用可能！** [Agent-Lightning](https://github.com/microsoft/agent-lightning/) チームと協力して、コード/数学と検索環境での効率的なモデルトレーニングを実装しました（ReTool、SearchR1）。Youtu-Agentの最適化により、分散トレーニングは128 GPUのマルチノードデプロイにシームレスにスケールできるようになりました。詳細は [rl/agl ブランチ](https://github.com/TencentCloudADP/youtu-agent/tree/rl/agl) をご覧ください。
 - 🎉 [2025-11-12] **Training-Free GRPO がメインブランチで利用可能に！** [Training-Free Group Relative Policy Optimization](https://arxiv.org/abs/2510.08191) によるエージェント学習モジュールがメインブランチに統合されました。ファインチューニング不要で、極めて低コスト（約8ドル）でエージェントの性能を向上させることができます。数学推論とウェブ検索タスクの使用方法と例については、[エージェント学習ドキュメント](https://tencentcloudadp.github.io/youtu-agent/practice/)をご覧ください。
