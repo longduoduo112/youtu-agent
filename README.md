@@ -34,6 +34,7 @@ Key highlights:
 
 ## 🗞️ News
 
+- 🚀 [2026-01-04] **Youtu Tip & Youtu-LLM Released!** We are excited to introduce [**Youtu Tip**](https://github.com/TencentCloudADP/youtu-tip), a macOS desktop AI assistant powered by offline models (via Ollama) for automating tasks like file reading and web browsing. We also released **Youtu-LLM** (1.96B params, 128K context), specialized for STEM, coding, and agentic tasks. [Official Site](https://youtu-tip.com/); [GitHub](https://github.com/TencentCloudADP/youtu-tip).
 - 🚀 [2025-12-10] **Youtu-Agent x Agent-Lightning training integration available!** We've collaborated with the [Agent-Lightning](https://github.com/microsoft/agent-lightning/) team to implement efficient model training in verious scenarios. With ours efforts, training can now seamlessly scale to multi-node deployment on 128 GPUs. See details in the [rl/agl branch](https://github.com/TencentCloudADP/youtu-agent/tree/rl/agl).
 - 🎉 [2025-11-12] **Training-Free GRPO now available in main branch!** The agent practice module powered by [Training-Free Group Relative Policy Optimization](https://arxiv.org/abs/2510.08191) is now integrated into the main branch. Enhance your agents' performance without fine-tuning at minimal cost (~$8 for RL runs). See our [Agent Practice Documentation](https://tencentcloudadp.github.io/youtu-agent/practice/) for usage and examples on math reasoning and web search tasks.
 - 📢 [2025-11-03] New examples: we add the [**PPT generation**](examples/ppt_gen/README.md) and [**RAG**](configs/agents/examples/rag.yaml) examples.
