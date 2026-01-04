@@ -2,10 +2,9 @@
 
 <div align="center">
 <a href="https://tencentcloudadp.github.io/youtu-agent/"><img src=https://img.shields.io/badge/📖-Documentation-blue.svg></a>
-<!-- <a href=https://arxiv.org/abs/2502.14345><img src=https://img.shields.io/badge/arXiv-2502.14345-b31b1b.svg></a> -->
 <a href=https://github.com/TencentCloudADP/youtu-agent><img src=https://img.shields.io/badge/GitHub-Tencent-blue.svg></a>
 <a href=https://deepwiki.com/TencentCloudADP/youtu-agent><img src=https://img.shields.io/badge/DeepWiki-Tencent-blue.svg></a>
-<a href=https://arxiv.org/abs/2510.08191><img src=https://img.shields.io/badge/arXiv-2510.08191-b31b1b.svg></a>
+<a href=https://arxiv.org/abs/2512.24615><img src=https://img.shields.io/badge/arXiv-2512.24615-b31b1b.svg></a>
 </div>
 
 <p align="center">
@@ -25,13 +24,13 @@
 <img src="docs/assets/mascot.png" alt="Youtu-agent Logo" width="200" align="left" style="margin-right:20px;">
 
 Key highlights:
-- **Verified performance**: Achieved 71.47% on WebWalkerQA (pass@1) and 72.8% on GAIA (text-only subset, pass@1), using purely `DeepSeek-V3` series models (without Claude or GPT), establishing a strong open-source starting point.
-- **Automatic Tool and Agent Generation**: Built on modular design and structured configuration system, Youtu-Agent supports automatic generation of tools and agents through LLMs, enabling rapid adaptation to new application scenarios and reducing manual configuration overhead.
-- **Automatic Agent Experience Learning**: Through [Training-Free GRPO](https://arxiv.org/abs/2510.08191), agents can continuously optimize their capabilities using historical experiences, delivering significant performance improvements with minimal cost.
-- **Agent Training**: Youtu-Agent also supports parameter fine-tuning of agent models through end-to-end RL training to enhance model capabilities.
+- **Verified performance**: Achieves state-of-the-art performance on WebWalkerQA (71.47%) and GAIA (72.8%) using purely open-weight models (e.g., `DeepSeek-V3`), establishing a strong open-source baseline.
+- **Automated Agent Generation**: Introduces two paradigms: a **Workflow** mode for standard tasks and a **Meta-Agent** mode for complex requirements. The framework supports automated generation of tool code, prompts, and configurations, achieving over 81% tool synthesis success rate.
+- **Continuous Experience Learning**: The **Agent Practice** module enables low-cost continuous evolution via [Training-Free GRPO](https://arxiv.org/abs/2510.08191). Agents accumulate experience and improve performance (e.g., +5.4% on AIME 2025) through in-context optimization without parameter updates.
+- **Scalable and Stable Agent RL**: The **Agent RL** module provides a complete pipeline for end-to-end reinforcement learning. By integrating with distributed frameworks, it addresses stability and scalability challenges, achieving 40% training speedup and scaling to 128 GPUs.
 - **Open-source friendly & cost-aware**: Optimized for accessible, low-cost deployment without reliance on closed models.
-- **Practical use cases**: Out-of-the-box support for tasks like CSV analysis, literature review, personal file organization, and podcast and video generation (coming soon).
-- **Flexible architecture**: Built on [openai-agents](https://github.com/openai/openai-agents-python), with extensible support for diverse model APIs (form `DeepSeek` to `gpt-oss`), tool integrations, and framework implementations.
+- **Practical use cases**: Out-of-the-box support for tasks like data analysis, literature review, personal file organization, retrieval-augmented generation, and PPT generation.
+- **Flexible architecture**: Built on [openai-agents](https://github.com/openai/openai-agents-python), with extensible support for diverse model APIs (from `DeepSeek` to `gpt-oss`), tool integrations, and framework implementations.
 
 ## 🗞️ News
 
