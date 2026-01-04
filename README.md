@@ -1,4 +1,4 @@
-# <img src="docs/assets/logo.svg" alt="Youtu-agent Logo" height="24px"> Youtu-Agent: A simple yet powerful agent framework that delivers with open-source models
+# <img src="docs/assets/logo.svg" alt="Youtu-agent Logo" height="24px"> Youtu-Agent: Scaling Agent Productivity with Automated Generation and Hybrid Policy Optimization
 
 <div align="center">
 <a href="https://tencentcloudadp.github.io/youtu-agent/"><img src=https://img.shields.io/badge/📖-Documentation-blue.svg></a>
@@ -401,6 +401,15 @@ We welcome contributions from the community! If you'd like to help improve Youtu
 If you find this work useful, please consider citing:
 
 ```bibtex
+@misc{youtu_agent,
+      title={Youtu-Agent: Scaling Agent Productivity with Automated Generation and Hybrid Policy Optimization}, 
+      author={Yuchen Shi and Yuzheng Cai and Siqi Cai and Zihan Xu and Lichao Chen and Yulei Qin and Zhijian Zhou and Xiang Fei and Chaofan Qiu and Xiaoyu Tan and Gang Li and Zongyi Li and Haojia Lin and Guocan Cai and Yong Mao and Yunsheng Wu and Ke Li and Xing Sun},
+      year={2025},
+      eprint={2512.24615},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2512.24615}, 
+}
 @misc{training_free_grpo,
       title={Training-Free Group Relative Policy Optimization}, 
       author={Tencent Youtu Lab},
@@ -409,14 +418,5 @@ If you find this work useful, please consider citing:
       archivePrefix={arXiv},
       primaryClass={cs.CL},
       url={https://arxiv.org/abs/2510.08191}, 
-}
-
-@misc{youtu-agent-2025,
-  title={Youtu-agent: A Simple yet Powerful Agent Framework},
-  author={Tencent Youtu Lab},
-  year={2025},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/TencentCloudADP/youtu-agent}},
 }
 ```
