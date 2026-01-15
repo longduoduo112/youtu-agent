@@ -77,7 +77,7 @@ This example script will download and upload the following built-in datasets to 
 - AFM_web_RL: Web agent reinforcement learning dataset
 - WebWalkerQA: Web navigation question-answering dataset
 
-**Important**: When uploading datasets, make sure that each `DatasetSample` includes the required fields: `dataset`, `source`, `question`, and `answer`, specifically, ensure to **set the `source` field as `"training_free_grpo"`** for proper data processing.
+**Important**: When uploading datasets, make sure that each `DatasetSample` includes the required fields: `dataset`, `source`, `instruction` (or `input`), and `answer`, specifically, ensure to **set the `source` field as `"training_free_grpo"`** for proper data processing.
 
 #### Option 2: Upload Custom Local Datasets
 
@@ -96,7 +96,7 @@ python scripts/data/upload_dataset.py \
 {
     "dataset": "YourDataset",       # Name of your dataset
     "source": "training_free_grpo", # Must be "training_free_grpo" for both practice and evaluation data
-    "question": "What is 2+2?",     # The question or prompt
+    "input": "What is 2+2?",        # The question or prompt
     "answer": "4"                   # The expected answer, set to None if not applicable
 }
 ```
