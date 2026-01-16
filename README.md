@@ -5,6 +5,7 @@
 <a href=https://github.com/TencentCloudADP/youtu-agent><img src=https://img.shields.io/badge/GitHub-Tencent-blue.svg></a>
 <a href=https://deepwiki.com/TencentCloudADP/youtu-agent><img src=https://img.shields.io/badge/DeepWiki-Tencent-blue.svg></a>
 <a href=https://arxiv.org/abs/2512.24615><img src=https://img.shields.io/badge/arXiv-2512.24615-b31b1b.svg></a>
+<a href="https://huggingface.co/collections/yolay/youtu-agent-rl"><img src=https://img.shields.io/badge/🤗%20HuggingFace-Youtu%20Agent%20RL-ffc107.svg></a>
 </div>
 
 <p align="center">
