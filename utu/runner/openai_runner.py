@@ -7,8 +7,7 @@ ADD:
 
 import asyncio
 import logging
-from typing import cast
-from typing_extensions import Unpack
+from typing import Unpack, cast
 
 from agents import (
     Agent,
@@ -22,22 +21,33 @@ from agents import (
     TResponseInputItem,
 )
 from agents._run_impl import (
-    RunImpl, NextStepHandoff, TraceCtxManager, NextStepFinalOutput, NextStepRunAgain, 
-    get_model_tracing_impl, 
+    NextStepFinalOutput,
+    NextStepHandoff,
+    NextStepRunAgain,
+    RunImpl,
+    TraceCtxManager,
+    get_model_tracing_impl,
 )
-from agents.exceptions import ModelBehaviorError, MaxTurnsExceeded, AgentsException, RunErrorDetails
+from agents.exceptions import AgentsException, MaxTurnsExceeded, ModelBehaviorError, RunErrorDetails
 from agents.guardrail import InputGuardrailResult
-from agents.items import HandoffCallItem, ModelResponse, ToolCallItem, ToolCallItemTypes, ReasoningItem
+from agents.items import HandoffCallItem, ModelResponse, ReasoningItem, ToolCallItem, ToolCallItemTypes
 from agents.result import RunResult
 from agents.run import (
-    AgentRunner, AgentToolUseTracker, RunResultStreaming, SingleStepResult, RunOptions,
-    _TOOL_CALL_TYPES, _ServerConversationTracker, _copy_str_or_list, DEFAULT_MAX_TURNS
+    _TOOL_CALL_TYPES,
+    DEFAULT_MAX_TURNS,
+    AgentRunner,
+    AgentToolUseTracker,
+    RunOptions,
+    RunResultStreaming,
+    SingleStepResult,
+    _copy_str_or_list,
+    _ServerConversationTracker,
 )
 from agents.stream_events import RawResponsesStreamEvent, RunItemStreamEvent
 from agents.tool_guardrails import ToolInputGuardrailResult, ToolOutputGuardrailResult
-from agents.tracing import Span, AgentSpanData, SpanError, agent_span
-from agents.util import _coro, _error_tracing
+from agents.tracing import AgentSpanData, Span, SpanError, agent_span
 from agents.usage import Usage
+from agents.util import _coro, _error_tracing
 from openai.types.responses import (
     ResponseCompletedEvent,
     ResponseFunctionToolCall,
@@ -53,7 +63,6 @@ logger = logging.getLogger(__name__)
 
 
 class UTUAgentRunner(AgentRunner):
-
     async def run(
         self,
         starting_agent: Agent[TContext],
@@ -79,9 +88,7 @@ class UTUAgentRunner(AgentRunner):
 
         # Keep original user input separate from session-prepared input
         original_user_input = input
-        prepared_input = await self._prepare_input_with_session(
-            input, session, run_config.session_input_callback
-        )
+        prepared_input = await self._prepare_input_with_session(input, session, run_config.session_input_callback)
 
         tool_use_tracker = AgentToolUseTracker()
 
@@ -120,8 +127,7 @@ class UTUAgentRunner(AgentRunner):
                     # agent changes, or if the agent loop ends.
                     if current_span is None:
                         handoff_names = [
-                            h.agent_name
-                            for h in await AgentRunner._get_handoffs(current_agent, context_wrapper)
+                            h.agent_name for h in await AgentRunner._get_handoffs(current_agent, context_wrapper)
                         ]
                         if output_schema := AgentRunner._get_output_schema(current_agent):
                             output_type_name = output_schema.name()
@@ -152,17 +158,18 @@ class UTUAgentRunner(AgentRunner):
                     )
                     # ADD: inject context infos
                     if isinstance(context_wrapper.context, dict):
-                        context_wrapper.context.update({
-                            "current_turn": current_turn,
-                            "max_turns": max_turns,
-                        })
+                        context_wrapper.context.update(
+                            {
+                                "current_turn": current_turn,
+                                "max_turns": max_turns,
+                            }
+                        )
 
                     if current_turn == 1:
                         input_guardrail_results, turn_result = await asyncio.gather(
                             self._run_input_guardrails(
                                 starting_agent,
-                                starting_agent.input_guardrails
-                                + (run_config.input_guardrails or []),
+                                starting_agent.input_guardrails + (run_config.input_guardrails or []),
                                 _copy_str_or_list(prepared_input),
                                 context_wrapper,
                             ),
@@ -225,12 +232,9 @@ class UTUAgentRunner(AgentRunner):
                             context_wrapper=context_wrapper,
                         )
                         if not any(
-                            guardrail_result.output.tripwire_triggered
-                            for guardrail_result in input_guardrail_results
+                            guardrail_result.output.tripwire_triggered for guardrail_result in input_guardrail_results
                         ):
-                            await self._save_result_to_session(
-                                session, [], turn_result.new_step_items
-                            )
+                            await self._save_result_to_session(session, [], turn_result.new_step_items)
 
                         return result
                     elif isinstance(turn_result.next_step, NextStepHandoff):
@@ -240,16 +244,11 @@ class UTUAgentRunner(AgentRunner):
                         should_run_agent_start_hooks = True
                     elif isinstance(turn_result.next_step, NextStepRunAgain):
                         if not any(
-                            guardrail_result.output.tripwire_triggered
-                            for guardrail_result in input_guardrail_results
+                            guardrail_result.output.tripwire_triggered for guardrail_result in input_guardrail_results
                         ):
-                            await self._save_result_to_session(
-                                session, [], turn_result.new_step_items
-                            )
+                            await self._save_result_to_session(session, [], turn_result.new_step_items)
                     else:
-                        raise AgentsException(
-                            f"Unknown next step type: {type(turn_result.next_step)}"
-                        )
+                        raise AgentsException(f"Unknown next step type: {type(turn_result.next_step)}")
             except AgentsException as exc:
                 exc.run_data = RunErrorDetails(
                     input=original_input,
@@ -284,11 +283,7 @@ class UTUAgentRunner(AgentRunner):
         if should_run_agent_start_hooks:
             await asyncio.gather(
                 hooks.on_agent_start(context_wrapper, agent),
-                (
-                    agent.hooks.on_start(context_wrapper, agent)
-                    if agent.hooks
-                    else _coro.noop_coroutine()
-                ),
+                (agent.hooks.on_start(context_wrapper, agent) if agent.hooks else _coro.noop_coroutine()),
             )
 
         output_schema = cls._get_output_schema(agent)
@@ -309,20 +304,20 @@ class UTUAgentRunner(AgentRunner):
         final_response: ModelResponse | None = None
 
         if server_conversation_tracker is not None:
-            input = server_conversation_tracker.prepare_input(
-                streamed_result.input, streamed_result.new_items
-            )
+            input = server_conversation_tracker.prepare_input(streamed_result.input, streamed_result.new_items)
         else:
             input = ItemHelpers.input_to_new_input_list(streamed_result.input)
             input.extend([item.to_input_item() for item in streamed_result.new_items])
 
         # ADD: inject context infos
         if isinstance(context_wrapper.context, dict):
-            context_wrapper.context.update({
-                "current_turn": streamed_result.current_turn,
-                "max_turns": streamed_result.max_turns,
-                # "streamed_result": streamed_result
-            })
+            context_wrapper.context.update(
+                {
+                    "current_turn": streamed_result.current_turn,
+                    "max_turns": streamed_result.max_turns,
+                    # "streamed_result": streamed_result
+                }
+            )
         input = cls._context_manager_preprocess(input, context_wrapper)
 
         # THIS IS THE RESOLVED CONFLICT BLOCK
@@ -338,22 +333,14 @@ class UTUAgentRunner(AgentRunner):
         await asyncio.gather(
             hooks.on_llm_start(context_wrapper, agent, filtered.instructions, filtered.input),
             (
-                agent.hooks.on_llm_start(
-                    context_wrapper, agent, filtered.instructions, filtered.input
-                )
+                agent.hooks.on_llm_start(context_wrapper, agent, filtered.instructions, filtered.input)
                 if agent.hooks
                 else _coro.noop_coroutine()
             ),
         )
 
-        previous_response_id = (
-            server_conversation_tracker.previous_response_id
-            if server_conversation_tracker
-            else None
-        )
-        conversation_id = (
-            server_conversation_tracker.conversation_id if server_conversation_tracker else None
-        )
+        previous_response_id = server_conversation_tracker.previous_response_id if server_conversation_tracker else None
+        conversation_id = server_conversation_tracker.conversation_id if server_conversation_tracker else None
 
         # 1. Stream the output events
         async for event in model.stream_response(
@@ -363,9 +350,7 @@ class UTUAgentRunner(AgentRunner):
             all_tools,
             output_schema,
             handoffs,
-            get_model_tracing_impl(
-                run_config.tracing_disabled, run_config.trace_include_sensitive_data
-            ),
+            get_model_tracing_impl(run_config.tracing_disabled, run_config.trace_include_sensitive_data),
             previous_response_id=previous_response_id,
             conversation_id=conversation_id,
             prompt=prompt_config,
@@ -397,9 +382,7 @@ class UTUAgentRunner(AgentRunner):
                 output_item = event.item
 
                 if isinstance(output_item, _TOOL_CALL_TYPES):
-                    call_id: str | None = getattr(
-                        output_item, "call_id", getattr(output_item, "id", None)
-                    )
+                    call_id: str | None = getattr(output_item, "call_id", getattr(output_item, "id", None))
 
                     if call_id and call_id not in emitted_tool_call_ids:
                         emitted_tool_call_ids.add(call_id)
@@ -408,9 +391,7 @@ class UTUAgentRunner(AgentRunner):
                             raw_item=cast(ToolCallItemTypes, output_item),
                             agent=agent,
                         )
-                        streamed_result._event_queue.put_nowait(
-                            RunItemStreamEvent(item=tool_item, name="tool_called")
-                        )
+                        streamed_result._event_queue.put_nowait(RunItemStreamEvent(item=tool_item, name="tool_called"))
 
                 elif isinstance(output_item, ResponseReasoningItem):
                     reasoning_id: str | None = getattr(output_item, "id", None)
@@ -469,11 +450,7 @@ class UTUAgentRunner(AgentRunner):
                 for item in items_to_filter
                 if not (
                     isinstance(item, ToolCallItem)
-                    and (
-                        call_id := getattr(
-                            item.raw_item, "call_id", getattr(item.raw_item, "id", None)
-                        )
-                    )
+                    and (call_id := getattr(item.raw_item, "call_id", getattr(item.raw_item, "id", None)))
                     and call_id in emitted_tool_call_ids
                 )
             ]
@@ -491,9 +468,7 @@ class UTUAgentRunner(AgentRunner):
             ]
 
         # Filter out HandoffCallItem to avoid duplicates (already sent earlier)
-        items_to_filter = [
-            item for item in items_to_filter if not isinstance(item, HandoffCallItem)
-        ]
+        items_to_filter = [item for item in items_to_filter if not isinstance(item, HandoffCallItem)]
 
         # Create filtered result and send to queue
         filtered_result = _dc.replace(single_step_result, new_step_items=items_to_filter)
@@ -519,11 +494,7 @@ class UTUAgentRunner(AgentRunner):
         if should_run_agent_start_hooks:
             await asyncio.gather(
                 hooks.on_agent_start(context_wrapper, agent),
-                (
-                    agent.hooks.on_start(context_wrapper, agent)
-                    if agent.hooks
-                    else _coro.noop_coroutine()
-                ),
+                (agent.hooks.on_start(context_wrapper, agent) if agent.hooks else _coro.noop_coroutine()),
             )
 
         system_prompt, prompt_config = await asyncio.gather(
@@ -573,7 +544,6 @@ class UTUAgentRunner(AgentRunner):
             run_config=run_config,
             tool_use_tracker=tool_use_tracker,
         )
-
 
     @classmethod
     def _context_manager_preprocess(
