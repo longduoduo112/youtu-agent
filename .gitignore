@@ -57,6 +57,8 @@ wheels/
 .gemini/
 .claude/
 .codex/
+.agent/
+openspec/
 
 # OS files
 .DS_Store

@@ -1,5 +1,6 @@
 import logging
 import shutil
+import subprocess
 from pathlib import Path
 
 import frontmatter
@@ -9,11 +10,21 @@ from .base_env import BaseEnv
 
 logger = logging.getLogger(__name__)
 
+
+def _check_openskills_installed() -> bool:
+    """Check if openskills CLI is installed."""
+    try:
+        result = subprocess.run(["which", "openskills"], capture_output=True, text=True)
+        return result.returncode == 0
+    except Exception:
+        return False
+
+
 TEMPLATE = r"""<env>
 {env}
 </env>
 <instructions>
-1. You can only run bash commands in your workspace!!!
+1. You CANNOT make any changes outside your workspace!
 </instructions>
 """
 
@@ -81,6 +92,13 @@ class ShellLocalEnv(BaseEnv):
         """Copy enabled skills to workspace .agent/skills/ directory."""
         if not self.enabled_skills:
             return
+
+        # Check if openskills CLI is installed
+        if not _check_openskills_installed():
+            logger.warning(
+                "openskills CLI is not installed. Skills require openskills to work properly. "
+                "Please install it from: https://github.com/numman-ali/openskills"
+            )
 
         source_root = DIR_ROOT / ".agent" / "skills"
         target_root = Path(self.workspace) / ".agent" / "skills"
