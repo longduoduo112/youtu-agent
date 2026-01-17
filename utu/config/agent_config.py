@@ -70,6 +70,8 @@ class AgentConfig(ConfigBaseModel):
     """Max turns for simple agent. This param is derived from @openai-agents"""
     stop_at_tool_names: list[str] | None = None
     """Stop at tools for simple agent. This param is derived from @openai-agents"""
+    runner: Literal["openai", "react"] = "openai"
+    """Runner name for simple agent."""
 
     # orchestra agent config
     planner_model: ModelConfigs = Field(default_factory=ModelConfigs)

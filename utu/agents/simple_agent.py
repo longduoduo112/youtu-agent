@@ -11,7 +11,6 @@ from agents import (
     ModelSettings,
     RunConfig,
     RunHooks,
-    Runner,
     StopAtTools,
     TContext,
     Tool,
@@ -25,6 +24,7 @@ from ..context import BaseContextManager, build_context_manager
 from ..db import DBService, TrajectoryModel
 from ..env import _BaseEnv, get_env
 from ..hooks import get_run_hooks
+from ..runner import get_runner
 from ..tools import TOOLKIT_MAP, AsyncBaseToolkit
 from ..utils import AgentsMCPUtils, AgentsUtils, get_logger, load_class_from_file
 from .common import QueueCompleteSentinel, TaskRecorder
@@ -260,11 +260,12 @@ class SimpleAgent:
         if isinstance(input, str):  # only add history when input is str?
             input = self.input_items + [{"content": input, "role": "user"}]
         run_kwargs = self._prepare_run_kwargs(input)
+        runner = get_runner(self.config.runner)
         if AgentsUtils.get_current_trace():
-            run_result = await Runner.run(**run_kwargs)
+            run_result = await runner.run(**run_kwargs)
         else:
             with trace(workflow_name="simple_agent", trace_id=recorder.trace_id):
-                run_result = await Runner.run(**run_kwargs)
+                run_result = await runner.run(**run_kwargs)
         # save final output and trajectory
         recorder.add_run_result(run_result)
         if save:
@@ -304,11 +305,12 @@ class SimpleAgent:
             if isinstance(input, str):  # only add history when input is str?
                 input = self.input_items + [{"content": input, "role": "user"}]
             run_kwargs = self._prepare_run_kwargs(input)
+            runner = get_runner(self.config.runner)
             if AgentsUtils.get_current_trace():
-                run_streamed_result = Runner.run_streamed(**run_kwargs)
+                run_streamed_result = runner.run_streamed(**run_kwargs)
             else:
                 with trace(workflow_name="simple_agent", trace_id=recorder.trace_id):
-                    run_streamed_result = Runner.run_streamed(**run_kwargs)
+                    run_streamed_result = runner.run_streamed(**run_kwargs)
             async for event in run_streamed_result.stream_events():
                 recorder._event_queue.put_nowait(event)
             # save final output and trajectory
