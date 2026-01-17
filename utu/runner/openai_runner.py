@@ -7,7 +7,7 @@ ADD:
 
 import asyncio
 import logging
-from typing import Unpack, cast
+from typing import cast
 
 from agents import (
     Agent,
@@ -55,6 +55,7 @@ from openai.types.responses import (
     ResponseOutputMessage,
     ResponseReasoningItem,
 )
+from typing_extensions import Unpack
 
 from ..config import AgentConfig
 from ..context import BaseContextManager
