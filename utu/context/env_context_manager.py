@@ -18,8 +18,15 @@ class EnvContextManager(BaseContextManager):
             logger.warning(f"run_context {run_context} or env is None")
             return input
         env: BaseEnv = run_context.context["env"]
-        env_state = env.get_state()
-        if env_state:
-            input = copy.deepcopy(input)
+        input = copy.deepcopy(input)
+        if (extra_sp := env.get_extra_sp()) and _is_first_query(input):
+            input = [EasyInputMessageParam(content=extra_sp, role="user")] + input
+        if env_state := env.get_state():
             input.append(EasyInputMessageParam(content=env_state, role="user"))
         return input
+
+
+def _is_first_query(input: str | list[TResponseInputItem]) -> bool:
+    if isinstance(input, str):
+        return True
+    return len(input) < 2

@@ -45,6 +45,7 @@ wheels/
 /data/
 /site/
 /logs/
+/workspace
 
 # generated configs
 /configs/tools/generated

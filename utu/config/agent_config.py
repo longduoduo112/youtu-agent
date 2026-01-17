@@ -64,6 +64,8 @@ class AgentConfig(ConfigBaseModel):
     """Context manager config"""
     env: EnvConfig = Field(default_factory=EnvConfig)
     """Env config"""
+    enabled_skills: list[str] = Field(default_factory=list)
+    """Enabled skills for this agent, only available when env=`shell_local` for now."""
     toolkits: dict[str, ToolkitConfig] = Field(default_factory=dict)
     """Toolkits config"""
     max_turns: int = 50
