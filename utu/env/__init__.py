@@ -14,7 +14,7 @@ async def get_env(config: AgentConfig, trace_id: str) -> _BaseEnv:
         case "base":
             return BaseEnv()
         case "shell_local":
-            return ShellLocalEnv(config.env.config, trace_id)
+            return ShellLocalEnv(config.env.config, trace_id, config.enabled_skills)
         case "e2b":
             return E2BEnv(config.env.config)
         case "browser_docker":

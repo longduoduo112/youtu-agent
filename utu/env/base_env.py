@@ -8,6 +8,11 @@ class _BaseEnv:
     """Environment interface for agents."""
 
     @abc.abstractmethod
+    def get_extra_sp(self) -> str:
+        """Get extra SP from the environment."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_state(self) -> str:
         """Get the current state of the environment."""
         raise NotImplementedError
@@ -32,6 +37,9 @@ class _BaseEnv:
 
 
 class BaseEnv(_BaseEnv):
+    def get_extra_sp(self) -> str:
+        return ""
+
     def get_state(self) -> str:
         return ""
 

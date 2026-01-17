@@ -6,10 +6,13 @@ defaults:
   - _self_
 
 agent:
-  name: FileManagerAgent
+  name: TestAgent
   instructions: You are a helpful assistant.
 
 env:
   name: shell_local
-  config:
-    workspace_root: /tmp/mock_files/
+context_manager:
+  name: env
+
+enabled_skills:
+  - pptx
