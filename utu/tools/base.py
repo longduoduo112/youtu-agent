@@ -43,6 +43,14 @@ class AsyncBaseToolkit:
         """Setup workspace. Implemented inside specific toolkits."""
         pass
 
+    async def build(self) -> None:
+        """Build/initialize the toolkit. Override in subclasses that need async initialization."""
+        pass
+
+    async def cleanup(self) -> None:
+        """Cleanup toolkit resources. Override in subclasses that need cleanup."""
+        pass
+
     @property
     def tools_map(self) -> dict[str, Callable]:
         """Lazy loading of tools map.

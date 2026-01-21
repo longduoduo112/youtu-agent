@@ -125,7 +125,9 @@ class SimpleAgent:
         logger.info("Cleaning up MCP servers...")
         await self._mcps_exit_stack.aclose()
         self._mcp_servers = []
-        logger.info("Cleaning up tools...")
+        logger.info("Cleaning up toolkits...")
+        for toolkit in self._toolkits.values():
+            await toolkit.cleanup()
         self._toolkits = {}
         logger.info("Cleaning up env...")
         await self.env.cleanup()
@@ -189,6 +191,7 @@ class SimpleAgent:
         logger.info(f"Loading builtin toolkit `{toolkit_config.name}` with config {toolkit_config}")
         toolkit = TOOLKIT_MAP[toolkit_config.name](toolkit_config)
         toolkit.setup_env(env)
+        await toolkit.build()
         self._toolkits[toolkit_config.name] = toolkit
         return toolkit
 
@@ -198,6 +201,7 @@ class SimpleAgent:
         toolkit_class = load_class_from_file(toolkit_config.customized_filepath, toolkit_config.customized_classname)
         toolkit = toolkit_class(toolkit_config)
         toolkit.setup_env(env)
+        await toolkit.build()
         self._toolkits[toolkit_config.name] = toolkit
         return toolkit
 
