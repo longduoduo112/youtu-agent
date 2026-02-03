@@ -176,7 +176,9 @@ class SandboxEnv(BaseEnv):
         if token:
             if "X-Access-Token" not in self.headers:
                 self.headers["X-Access-Token"] = token
-                logger.info("Sandbox access token loaded from %s", "config" if config.get("access_token") else token_env)
+                logger.info(
+                    "Sandbox access token loaded from %s", "config" if config.get("access_token") else token_env
+                )
         elif token_env:
             logger.warning("Sandbox access token env var %s is not set", token_env)
 
