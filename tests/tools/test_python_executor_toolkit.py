@@ -69,5 +69,5 @@ async def test_ipython_e2b():
 
 
 if __name__ == "__main__":
-    # asyncio.run(test_ipython())
-    asyncio.run(test_ipython_e2b())
+    asyncio.run(test_ipython())
+    # asyncio.run(test_ipython_e2b())
